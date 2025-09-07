@@ -56,4 +56,16 @@ export const accountService = {
     if (error) throw error;
     return data;
   },
+
+  async listAccounts(userId: string) {
+    const db = supabase as SupabaseClient<Database>;
+    const { data, error } = await db
+      .from('accounts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
 };
