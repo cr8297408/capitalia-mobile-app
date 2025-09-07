@@ -7,9 +7,10 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, TrendingUp, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, TrendingUp, AlertCircle, Trash2 } from 'lucide-react-native';
 import type { AccountStackScreenProps, RootStackParamList } from '@/navigation/types';
 import { useAccountDetail } from '@/features/account-management/hooks/useAccountDetail';
 import { useTransactions } from '@/features/transaction-tracking/hooks/useTransactions';
@@ -54,6 +55,58 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
     return format(new Date(dateString), 'MMM d, yyyy', { locale: enUS });
   };
 
+  const handleEdit = () => {
+    if (!account) return;
+    navigation.navigate('EditAccount', { accountId: account.id });
+  };
+
+  const handleDelete = () => {
+    if (!account) return;
+    // TODO: Implement delete account functionality
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete this account?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => {
+          // Handle delete account
+          console.log('Delete account', account.id);
+        }},
+      ]
+    );
+  };
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Account Details',
+      headerTitleAlign: 'left',
+      headerLeft: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={{ padding: 8, marginLeft: 8 }}
+        >
+          <ArrowLeft color="#111827" size={24} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <View style={{ flexDirection: 'row', marginRight: 8 }}>
+          <TouchableOpacity 
+            onPress={handleEdit} 
+            style={{ padding: 8 }}
+          >
+            <Edit color="#2563EB" size={24} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleDelete} 
+            style={{ padding: 8, marginLeft: 8 }}
+          >
+            <Trash2 color="#EF4444" size={24} />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, account]);
+
   if (isAccountLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -80,21 +133,6 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <ArrowLeft size={24} color="#111827" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Account Details</Text>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate('EditAccount', { accountId: account.id })}
-          style={styles.editButton}
-        >
-          <Edit size={20} color="#2563EB" />
-        </TouchableOpacity>
-      </View>
 
       <ScrollView 
         style={styles.content}
@@ -228,26 +266,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  backButton: {
-    padding: 8,
-  },
-  editButton: {
-    padding: 8,
   },
   loadingContainer: {
     flex: 1,
