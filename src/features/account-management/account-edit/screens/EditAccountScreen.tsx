@@ -13,6 +13,7 @@ type EditAccountScreenProps = RootStackScreenProps<'EditAccount'> & {
     params: {
       accountId: string;
       initialData?: EditAccountFormData;
+      onGoBack?: () => void;
     };
   };
 };
@@ -54,9 +55,13 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
     }
   }, [fetchAccount, initialDataFromParams]);
 
-  const handleSave = async (data: EditAccountFormData) => {
+  const saveAndGoBack = async (data: EditAccountFormData) => {
     const result = await updateAccount(data);
     if (result.ok) {
+      // Call the onGoBack callback if provided
+      if (route.params?.onGoBack) {
+        route.params.onGoBack();
+      }
       navigation.goBack();
     } else {
       // Show error message
@@ -91,19 +96,6 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
           disabled={isSaving || isDeleting}
         >
           <ArrowLeft color="#111827" size={24} />
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity 
-          onPress={() => {}} // This is just to show the save button in the header
-          style={{ padding: 8 }}
-          disabled={isSaving || isDeleting}
-        >
-          {isSaving ? (
-            <ActivityIndicator size="small" color="#2563EB" />
-          ) : (
-            <Save color={isDeleting ? '#9CA3AF' : '#2563EB'} size={24} />
-          )}
         </TouchableOpacity>
       ),
     });
@@ -147,7 +139,7 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
     <SafeAreaView style={styles.container}>
       <AccountForm 
         initialData={initialData}
-        onSubmit={handleSave}
+        onSubmit={saveAndGoBack}
         onDelete={handleDelete}
         isSubmitting={isSaving}
         isDeleting={isDeleting}

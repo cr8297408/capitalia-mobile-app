@@ -83,7 +83,6 @@ export const accountService = {
     accountId: string,
     updates: {
       name?: string;
-      balance?: number;
       account_type?: 'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan';
       currency?: string;
       institution_name?: string | null;

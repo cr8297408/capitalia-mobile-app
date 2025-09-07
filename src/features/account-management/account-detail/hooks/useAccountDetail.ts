@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
+import { useFocusEffect } from '@react-navigation/native';
 import { accountService } from '@/features/account-management/services/accountService';
 
 type Account = {
@@ -34,11 +35,21 @@ export const useAccountDetail = (accountId: string, navigation: any) => {
     }
   }, [accountId]);
 
+  // Fetch data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (accountId) {
+        fetchAccount();
+      }
+    }, [accountId, fetchAccount])
+  );
+
+  // Initial fetch
   useEffect(() => {
     if (accountId) {
       fetchAccount();
     }
-  }, [accountId, fetchAccount]);
+  }, [accountId]);
 
   const refresh = useCallback(() => {
     fetchAccount();
@@ -64,20 +75,23 @@ export const useAccountDetail = (accountId: string, navigation: any) => {
   }, []);
 
   const handleEdit = useCallback(() => {
-    // Navigate to edit screen with the account ID
-    if (account) {
-      (navigation as any).navigate('EditAccount', { 
-        accountId: account.id,
-        // Pass any additional data needed for the edit form
-        initialData: {
-          name: account.name,
-          balance: account.balance.toString(),
-          accountType: account.account_type as any,
-          currency: account.currency || 'USD',
-        },
-      });
-    }
-  }, [navigation, account]);
+    if (!account) return;
+    
+    (navigation as any).navigate('EditAccount', { 
+      accountId: account.id,
+      // Pass any additional data needed for the edit form
+      initialData: {
+        name: account.name,
+        balance: account.balance.toString(),
+        accountType: account.account_type as any,
+        currency: account.currency || 'USD',
+      },
+      // Add callback to refresh data when returning from edit screen
+      onGoBack: () => {
+        refresh();
+      }
+    });
+  }, [navigation, account, refresh]);
 
   const handleDelete = useCallback(async () => {
     if (!account) return;

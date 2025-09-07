@@ -13,7 +13,6 @@ export const useEditAccount = (accountId: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [originalBalance, setOriginalBalance] = useState(0);
 
   const fetchAccount = useCallback(async (): Promise<{ ok: boolean; account?: Account; code?: string; message?: string }> => {
     if (!accountId) return { ok: false, code: 'validation_error', message: 'Account ID is required' };
@@ -31,7 +30,6 @@ export const useEditAccount = (accountId: string) => {
       }
       
       const account = data as unknown as Account;
-      setOriginalBalance(account.balance);
       return { 
         ok: true, 
         account
@@ -49,20 +47,13 @@ export const useEditAccount = (accountId: string) => {
   }, [accountId]);
 
   const updateAccount = useCallback(async (data: EditAccountFormData): Promise<EditAccountResult> => {
-    if (!user) {
-      return { 
-        ok: false, 
-        code: 'not_authenticated', 
-        message: 'Please sign in to update an account.' 
-      };
-    }
-
+    const { ok, account } = await fetchAccount();
     const trimmedName = data.name.trim();
-    if (!trimmedName) {
+    if (!trimmedName || !data.balance) {
       return { 
         ok: false, 
         code: 'validation_error', 
-        message: 'Please enter an account name.' 
+        message: 'Por favor completa todos los campos' 
       };
     }
 
@@ -71,91 +62,144 @@ export const useEditAccount = (accountId: string) => {
       return { 
         ok: false, 
         code: 'validation_error', 
-        message: 'Please enter a valid balance.' 
+        message: 'Por favor ingresa un saldo válido' 
       };
     }
 
-    const balanceDifference = newBalance - originalBalance;
+    const balanceDifference = newBalance - (account?.balance ?? 0);
+    console.log(`💰 [Account Update] Balance change: ${account?.balance} → ${newBalance} (Δ: ${balanceDifference.toFixed(2)})`);
     const isBalanceChanged = Math.abs(balanceDifference) > 0.01;
+    
+    console.log(`📊 [Account Update] Balance changed: ${isBalanceChanged ? 'Yes' : 'No'}`);
 
     try {
       setIsSaving(true);
       
-      // Update the account
-      const { data: updatedAccount, error: updateError } = await accountService.updateAccount(accountId, {
+      const updateData = {
         name: trimmedName,
-        balance: newBalance,
         account_type: data.accountType,
         currency: data.currency,
-      });
+      };
+      
+      console.log('📤 [Account Update] Updating account with data:', JSON.stringify(updateData, null, 2));
+      
+      // Update the account
+      const { data: updatedAccount, error: updateError } = await accountService.updateAccount(accountId, updateData);
 
-      if (updateError) {
-        throw new Error('Failed to update account');
+      let finalAccount = updatedAccount;
+      
+      if (updateError || !updatedAccount) {
+        console.warn('⚠️ [Account Update] Update did not return account data, attempting to refetch...');
+        
+        // If update didn't return the account, try to fetch it again
+        const { data: refetchedAccount, error: refetchError } = await accountService.getAccountById(accountId);
+        
+        if (refetchError || !refetchedAccount) {
+          console.error('❌ [Account Update] Failed to refetch account after update:', refetchError || 'No data returned');
+          const errorMessage = (updateError as { message?: string })?.message || 'Error al actualizar la cuenta y no se pudo recuperar la información actualizada';
+          throw new Error(errorMessage);
+        }
+        
+        finalAccount = refetchedAccount;
+        console.log('✅ [Account Update] Successfully refetched account after update');
       }
       
-      if (!updatedAccount) {
-        throw new Error('No account data returned from update');
-      }
-
+      console.log('✅ [Account Update] Account updated successfully:', finalAccount);
+      
       // Create a transaction for balance adjustment if needed
       if (isBalanceChanged) {
-        const transactionType = balanceDifference > 0 ? 'income' : 'expense';
-        const amount = Math.abs(balanceDifference);
+        console.log('🔄 [Transaction] Starting balance adjustment transaction...');
+        console.log(`💱 [Transaction] Type: ${balanceDifference > 0 ? 'income' : 'expense'}, Amount: ${Math.abs(balanceDifference).toFixed(2)}`);
         
-        const adjustmentCategoryId = await categoryService.getAdjustmentCategory() || undefined;
-        
-        if (!user?.id) {
-          throw new Error('User not authenticated');
-        }
-
-        const transactionAmount = transactionType === 'expense' ? -amount : amount;
-        
-        // Create a transaction for the balance adjustment
-        // Get the adjustment category or find any available category
-        let categoryId = adjustmentCategoryId;
-        
-        // If we don't have an adjustment category, try to get any available category
-        if (!categoryId) {
-          const firstCategory = await categoryService.getCategoryByName('');
-          if (firstCategory) {
-            categoryId = firstCategory.id;
+        try {
+          // Determine if this is an income or expense based on balance change
+          const isIncome = balanceDifference > 0;
+          const transactionType: 'income' | 'expense' = isIncome ? 'income' : 'expense';
+          // Use the balance difference as the amount (positive or negative)
+          const amount = balanceDifference;
+          
+          console.log(`💰 [Transaction] Amount after adjustment: ${amount} (${transactionType})`);
+          
+          console.log('🔍 [Transaction] Looking for adjustment category...');
+          // Get adjustment category or any available category as fallback
+          let categoryId = await categoryService.getAdjustmentCategory();
+          
+          if (!categoryId) {
+            console.warn('⚠️ [Transaction] No se encontró categoría de ajuste, usando categoría por defecto');
+            const firstCategory = await categoryService.getCategoryByName('');
+            if (firstCategory) {
+              categoryId = firstCategory.id;
+              console.log(`✅ [Transaction] Using default category: ${firstCategory.name} (${firstCategory.id})`);
+            }
+          } else {
+            console.log(`✅ [Transaction] Using adjustment category: ${categoryId}`);
           }
-        }
-        
-        if (!categoryId) {
-          throw new Error('Could not find a suitable category for balance adjustment');
-        }
-        
-        const transactionData = {
-          user_id: user.id,
-          account_id: accountId,
-          amount: transactionAmount,
-          type: transactionType as 'income' | 'expense',
-          description: 'Balance adjustment',
-          date: new Date().toISOString(),
-          category_id: categoryId,
-          is_recurring: false, // Default to false for balance adjustments
-          notes: 'Automatic balance adjustment',
-        };
+          
+          if (!categoryId) {
+            const errorMsg = 'No se pudo encontrar una categoría adecuada para el ajuste';
+            console.error(`❌ [Transaction] ${errorMsg}`);
+            return { 
+              ok: true, 
+              account: updatedAccount as any,
+              message: 'La cuenta se actualizó correctamente, pero no se pudo crear la transacción de ajuste (categoría no encontrada)'
+            };
+          }
+          
+          if (!user?.id) {
+            const errorMsg = 'Usuario no autenticado al crear transacción';
+            console.error(`❌ [Transaction] ${errorMsg}`);
+            throw new Error(errorMsg);
+          }
 
-        await createTransaction(transactionData);
+          // For expenses, amount is already negative; for income, it's positive
+          const transactionData = {
+            user_id: user.id,
+            account_id: accountId,
+            amount: amount, // amount is already negative for expenses
+            type: transactionType,
+            description: 'Ajuste de saldo',
+            category_id: categoryId,
+            date: new Date().toISOString(),
+            is_recurring: false,
+            notes: `Ajuste de saldo de $${account?.balance.toFixed(2)} a $${newBalance.toFixed(2)}`,
+          };
+          
+          console.log('📝 [Transaction] Creating transaction with data:', JSON.stringify({
+            ...transactionData,
+            amount: `${amount} (${transactionType}, ${amount < 0 ? 'negative' : 'positive'})`,
+            category_id: categoryId
+          }, null, 2));
+          
+          const result = await createTransaction(transactionData);
+          console.log('✅ [Transaction] Transaction created successfully:', result);
+        } catch (txError) {
+          const errorMsg = txError instanceof Error ? txError.message : 'Error desconocido';
+          console.error('❌ [Transaction] Error creando transacción de ajuste:', errorMsg);
+          console.error('Transaction error details:', txError);
+          return { 
+            ok: true, 
+            account: updatedAccount as any,
+            message: 'La cuenta se actualizó correctamente, pero hubo un error al crear la transacción de ajuste.'
+          };
+        }
       }
 
       return { 
         ok: true, 
-        account: updatedAccount as any 
+        account: updatedAccount as any,
+        message: 'La cuenta se ha actualizado correctamente'
       };
     } catch (error: any) {
-      console.error('Error updating account:', error);
+      console.error('Error actualizando cuenta:', error);
       return { 
         ok: false, 
         code: 'unknown_error', 
-        message: error?.message || 'Failed to update account' 
+        message: error?.message || 'No se pudo actualizar la cuenta. Por favor, inténtalo de nuevo.' 
       };
     } finally {
       setIsSaving(false);
     }
-  }, [accountId, user, originalBalance, createTransaction]);
+  }, [accountId, user, createTransaction]);
 
   const deleteAccount = useCallback(async (): Promise<DeleteAccountResult> => {
     if (!user) {

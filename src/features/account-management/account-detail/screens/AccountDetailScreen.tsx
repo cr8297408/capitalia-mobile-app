@@ -119,6 +119,7 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
             <View style={[screenStyles.iconContainer, { backgroundColor: '#EFF6FF' }]}>
               {getAccountIcon(account.account_type)}
             </View>
+            <View>
             <View style={screenStyles.accountInfo}>
               <Text style={screenStyles.accountName}>{account.name}</Text>
               <Text style={screenStyles.accountType}>
@@ -131,6 +132,7 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
                 maximumFractionDigits: 2,
               })}
             </Text>
+            </View>
           </View>
 
           <View style={screenStyles.detailsContainer}>

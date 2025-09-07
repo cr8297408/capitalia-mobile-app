@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#111827',
+    marginLeft: 12,
   },
   detailsContainer: {
     borderTopWidth: 1,
