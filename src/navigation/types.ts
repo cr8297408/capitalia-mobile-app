@@ -81,6 +81,11 @@ export type TransactionStackScreenProps<T extends keyof TransactionStackParamLis
   MainTabScreenProps<keyof MainTabParamList>
 >;
 
+export type AccountStackScreenProps<T extends keyof AccountStackParamList> = CompositeScreenProps<
+  StackScreenProps<AccountStackParamList, T>,
+  MainTabScreenProps<keyof MainTabParamList>
+>;
+
 // Navigation prop types for hooks
 export type RootStackNavigationProp = RootStackScreenProps<keyof RootStackParamList>['navigation'];
 export type MainTabNavigationProp = MainTabScreenProps<keyof MainTabParamList>['navigation'];

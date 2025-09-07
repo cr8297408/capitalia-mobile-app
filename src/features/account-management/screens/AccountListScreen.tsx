@@ -13,10 +13,11 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '@/navigation/types';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAccounts } from '@/features/account-management/hooks/useAccounts';
 
 export const AccountListScreen: React.FC = () => {
-  const navigation = useNavigation<RootStackNavigationProp>();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { isPremium, limits } = useAuth();
   const { accounts, isLoading, error, refresh } = useAccounts();
 
@@ -60,15 +61,21 @@ export const AccountListScreen: React.FC = () => {
             onRefresh={refresh}
             refreshing={isLoading}
             renderItem={({ item }) => (
-              <View style={styles.accountItem}>
+              <TouchableOpacity 
+                style={styles.accountItem}
+                onPress={() => navigation.navigate('AccountDetail', { accountId: item.id })}
+                activeOpacity={0.7}
+              >
                 <View style={{ flex: 1 }}>
                   <Text style={styles.accountName}>{item.name}</Text>
-                  <Text style={styles.accountMeta}>{item.account_type}</Text>
+                  <Text style={styles.accountMeta}>
+                    {item.account_type.replace(/_/g, ' ')}
+                  </Text>
                 </View>
                 <Text style={styles.accountBalance}>
                   {item.currency} {Number(item.balance).toFixed(2)}
                 </Text>
-              </View>
+              </TouchableOpacity>
             )}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             contentContainerStyle={{ paddingVertical: 12, paddingHorizontal: 24 }}

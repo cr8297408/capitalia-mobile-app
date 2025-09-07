@@ -1,3 +1,5 @@
+export type TransactionType = 'income' | 'expense';
+
 export interface Database {
   public: {
     Tables: {

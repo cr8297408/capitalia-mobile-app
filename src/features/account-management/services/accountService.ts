@@ -68,4 +68,16 @@ export const accountService = {
     if (error) throw error;
     return data;
   },
+
+  async getAccountById(accountId: string) {
+    const db = supabase as SupabaseClient<Database>;
+    const { data, error } = await db
+      .from('accounts')
+      .select('*')
+      .eq('id', accountId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
 };
