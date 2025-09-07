@@ -10,22 +10,37 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Save } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
+import { useAddAccount } from '@/features/account-management/hooks/useAddAccount';
 
 type AddAccountScreenProps = RootStackScreenProps<'AddAccount'>;
 
 export const AddAccountScreen: React.FC<AddAccountScreenProps> = ({ navigation }) => {
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
+  const { isSaving, saveAccount } = useAddAccount();
 
-  const handleSave = () => {
-    if (!name || !balance) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleSave = async () => {
+    const result = await saveAccount({ name, balance });
+    if (result.ok) {
+      Alert.alert('Success', 'Account created successfully');
+      navigation.goBack();
       return;
     }
-    
-    // TODO: Implement account saving logic
-    Alert.alert('Success', 'Account will be saved when implemented');
-    navigation.goBack();
+
+    // Map error codes to alerts
+    switch (result.code) {
+      case 'not_authenticated':
+        Alert.alert('Not authenticated', result.message);
+        break;
+      case 'validation_error':
+        Alert.alert('Validation error', result.message);
+        break;
+      case 'limit_reached':
+        Alert.alert('Upgrade required', result.message);
+        break;
+      default:
+        Alert.alert('Error', result.message);
+    }
   };
 
   const handleCancel = () => {
@@ -39,7 +54,7 @@ export const AddAccountScreen: React.FC<AddAccountScreenProps> = ({ navigation }
           <X color="#6B7280" size={24} />
         </TouchableOpacity>
         <Text style={styles.title}>Add Account</Text>
-        <TouchableOpacity onPress={handleSave}>
+        <TouchableOpacity onPress={handleSave} disabled={isSaving}>
           <Save color="#2563EB" size={24} />
         </TouchableOpacity>
       </View>
