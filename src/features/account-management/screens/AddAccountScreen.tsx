@@ -19,13 +19,15 @@ export const AddAccountScreen: React.FC<AddAccountScreenProps> = ({ navigation }
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
   const [accountType, setAccountType] = useState<'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan'>('checking');
+  const [currency, setCurrency] = useState('USD');
   const { isSaving, saveAccount } = useAddAccount();
 
   const handleSave = async () => {
     const result = await saveAccount({ 
       name, 
       balance,
-      accountType // Pass selected account type
+      accountType,
+      currency,
     });
     if (result.ok) {
       Alert.alert('Success', 'Account created successfully');
@@ -102,6 +104,27 @@ export const AddAccountScreen: React.FC<AddAccountScreenProps> = ({ navigation }
               <Picker.Item label="Cash" value="cash" />
               <Picker.Item label="Investment" value="investment" />
               <Picker.Item label="Loan" value="loan" />
+            </Picker>
+            <ChevronDown color="#6B7280" size={20} style={styles.pickerIcon} />
+          </View>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Currency</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={currency}
+              onValueChange={(itemValue) => setCurrency(itemValue)}
+              style={styles.picker}
+              dropdownIconColor="#6B7280"
+            >
+              <Picker.Item label="🇺🇸 US Dollar (USD)" value="USD" />
+              <Picker.Item label="🇪🇺 Euro (EUR)" value="EUR" />
+              <Picker.Item label="🇬🇧 British Pound (GBP)" value="GBP" />
+              <Picker.Item label="🇨🇦 Canadian Dollar (CAD)" value="CAD" />
+              <Picker.Item label="🇦🇺 Australian Dollar (AUD)" value="AUD" />
+              <Picker.Item label="🇯🇵 Japanese Yen (JPY)" value="JPY" />
+              <Picker.Item label="🇨🇴 Colombian Peso (COP)" value="COP" />
             </Picker>
             <ChevronDown color="#6B7280" size={20} style={styles.pickerIcon} />
           </View>
