@@ -12,6 +12,7 @@ type GetTransactionsParams = {
   offset?: number;
   fromDate?: string;
   toDate?: string;
+  isActiveAccount?: boolean;
 };
 
 export const transactionListService = {
@@ -21,12 +22,14 @@ export const transactionListService = {
     offset = 0,
     fromDate,
     toDate,
+    isActiveAccount = true,
   }: GetTransactionsParams = {}): Promise<{ data: TransactionWithCategory[]; count: number }> {
     let query = supabase
       .from('transactions')
       .select(`
         *,
-        categories:category_id (name)
+        categories:category_id (name),
+        accounts:account_id (id, is_active)
       `, { count: 'exact' })
       .order('date', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -41,6 +44,10 @@ export const transactionListService = {
 
     if (toDate) {
       query = query.lte('date', toDate);
+    }
+
+    if (isActiveAccount) {
+      query = query.eq('accounts.is_active', isActiveAccount);
     }
 
     const { data, error, count } = await query;

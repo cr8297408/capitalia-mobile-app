@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, TrendingUp, AlertCircle, Trash2 } from 'lucide-react-native';
 import type { AccountStackScreenProps, RootStackParamList } from '@/navigation/types';
 import { useAccountDetail } from '@/features/account-management/hooks/useAccountDetail';
+import { accountService } from '@/features/account-management/services/accountService';
 import { useTransactions } from '@/features/transaction-tracking/hooks/useTransactions';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -60,18 +61,46 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
     navigation.navigate('EditAccount', { accountId: account.id });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!account) return;
-    // TODO: Implement delete account functionality
+    
     Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete this account?',
+      'Eliminar cuenta',
+      '¿Estás seguro de que deseas eliminar esta cuenta? Esta acción no se puede deshacer.',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          // Handle delete account
-          console.log('Delete account', account.id);
-        }},
+        { 
+          text: 'Cancelar', 
+          style: 'cancel' 
+        },
+        { 
+          text: 'Eliminar', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              await accountService.deleteAccount(account.id);
+              // Show success message
+              Alert.alert(
+                'Cuenta eliminada',
+                'La cuenta se ha eliminado correctamente.',
+                [
+                  { 
+                    text: 'Aceptar',
+                    onPress: () => {
+                      // Navigate back to accounts list
+                      navigation.goBack();
+                    }
+                  }
+                ]
+              );
+            } catch (error) {
+              console.error('Error deleting account:', error);
+              Alert.alert(
+                'Error',
+                'No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo.'
+              );
+            }
+          }
+        },
       ]
     );
   };

@@ -57,12 +57,13 @@ export const accountService = {
     return data;
   },
 
-  async listAccounts(userId: string) {
+  async listAccounts(userId: string, isActive = true) {
     const db = supabase as SupabaseClient<Database>;
     const { data, error } = await db
       .from('accounts')
       .select('*')
       .eq('user_id', userId)
+      .eq('is_active', isActive)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -110,7 +111,9 @@ export const accountService = {
     const db = supabase as SupabaseClient<Database>;
     const { error } = await db
       .from('accounts')
-      .delete()
+      .update({ 
+        is_active: false
+      } as never) // Type assertion needed due to TypeScript limitations
       .eq('id', accountId);
 
     if (error) throw error;
