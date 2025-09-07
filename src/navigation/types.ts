@@ -55,6 +55,7 @@ export type AccountStackParamList = {
   AccountList: undefined;
   AccountDetail: { accountId: string };
   AddAccount: undefined;
+  EditAccount: { accountId: string };
 };
 
 export type GoalStackParamList = {

@@ -24,6 +24,10 @@ export const useAccountList = () => {
     navigation.navigate('AccountDetail', { accountId });
   }, [navigation]);
 
+  const handleEditAccount = useCallback((accountId: string) => {
+    navigation.navigate('EditAccount', { accountId });
+  }, [navigation]);
+
   return {
     accounts,
     isLoading,
@@ -33,5 +37,6 @@ export const useAccountList = () => {
     limits,
     handleAddAccount,
     handleAccountPress,
+    handleEditAccount,
   };
 };

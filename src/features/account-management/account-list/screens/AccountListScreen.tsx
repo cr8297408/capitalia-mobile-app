@@ -20,6 +20,7 @@ export const AccountListScreen: React.FC = () => {
     limits,
     handleAddAccount,
     handleAccountPress,
+    handleEditAccount,
   } = useAccountList();
 
   // Refresh when screen regains focus (e.g., after adding a new account)
@@ -32,9 +33,10 @@ export const AccountListScreen: React.FC = () => {
   const renderAccountItem = useCallback(({ item }: { item: AccountItemType }) => (
     <AccountItem 
       account={item} 
-      onPress={handleAccountPress} 
+      onPress={() => handleAccountPress(item.id)}
+      onEdit={() => handleEditAccount(item.id)}
     />
-  ), [handleAccountPress]);
+  ), [handleAccountPress, handleEditAccount]);
 
   const renderSeparator = useCallback(() => (
     <View style={styles.separator} />

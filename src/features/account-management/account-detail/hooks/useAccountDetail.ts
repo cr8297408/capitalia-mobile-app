@@ -64,9 +64,20 @@ export const useAccountDetail = (accountId: string, navigation: any) => {
   }, []);
 
   const handleEdit = useCallback(() => {
-    if (!account) return;
-    navigation.navigate('EditAccount', { accountId: account.id });
-  }, [account, navigation]);
+    // Navigate to edit screen with the account ID
+    if (account) {
+      (navigation as any).navigate('EditAccount', { 
+        accountId: account.id,
+        // Pass any additional data needed for the edit form
+        initialData: {
+          name: account.name,
+          balance: account.balance.toString(),
+          accountType: account.account_type as any,
+          currency: account.currency || 'USD',
+        },
+      });
+    }
+  }, [navigation, account]);
 
   const handleDelete = useCallback(async () => {
     if (!account) return;
