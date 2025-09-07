@@ -111,7 +111,7 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
   }, [isLoading]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['right', 'left']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Transacciones</Text>
         <TouchableOpacity 
