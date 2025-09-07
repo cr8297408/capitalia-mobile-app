@@ -7,6 +7,7 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
   // Modal screens
+  TransactionList: { accountId?: string };
   TransactionDetail: { transactionId: string };
   AddTransaction: { accountId?: string };
   EditTransaction: { transactionId: string };
