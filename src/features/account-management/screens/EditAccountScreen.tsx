@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { X, Save, Trash2 } from 'lucide-react-native';
+import { X, Save, Trash2, ArrowLeft } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
 import { accountService } from '../services/accountService';
 import type { Database } from '@/types/supabase';
@@ -177,6 +177,34 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
     }
   };
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Edit Account',
+      headerTitleAlign: 'left',
+      headerLeft: () => (
+        <TouchableOpacity 
+          onPress={handleCancel} 
+          style={{ padding: 8, marginLeft: 8 }}
+        >
+          <ArrowLeft color="#111827" size={24} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity 
+          onPress={handleSave} 
+          disabled={isSaving || isDeleting}
+          style={{ padding: 8 }}
+        >
+          {isSaving ? (
+            <ActivityIndicator size="small" color="#2563EB" />
+          ) : (
+            <Save color={isDeleting ? '#9CA3AF' : '#2563EB'} size={24} />
+          )}
+        </TouchableOpacity>
+      )
+    });
+  }, [navigation, handleCancel]);
+
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.loadingContainer]}>
@@ -187,36 +215,6 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} disabled={isSaving || isDeleting}>
-          <X color={isSaving || isDeleting ? '#9CA3AF' : '#6B7280'} size={24} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Edit Account</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity 
-            onPress={handleDelete} 
-            style={styles.deleteButton}
-            disabled={isSaving || isDeleting}
-          >
-            {isDeleting ? (
-              <ActivityIndicator size="small" color="#EF4444" />
-            ) : (
-              <Trash2 color={isSaving ? '#9CA3AF' : '#EF4444'} size={20} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={handleSave} 
-            disabled={isSaving || isDeleting}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color="#2563EB" />
-            ) : (
-              <Save color={isDeleting ? '#9CA3AF' : '#2563EB'} size={24} />
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <View style={styles.form}>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Account Name</Text>

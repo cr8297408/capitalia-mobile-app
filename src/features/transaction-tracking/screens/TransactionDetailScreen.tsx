@@ -171,13 +171,16 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
         </View>
 
         <View style={styles.detailsContainer}>
+          {/* Category Row */}
           <TouchableOpacity 
             style={styles.detailRow}
             onPress={() => {
               if (transaction.category_id) {
-                // Navigate to category edit if needed
+                // Navigate to the budget tab where categories are managed
+                navigation.navigate('Main', { screen: 'Categories' } as any);
               }
             }}
+            disabled={!transaction.category_id}
           >
             <View style={[styles.detailIcon, { backgroundColor: '#F3F4F6' }]}>
               {transaction.category_icon ? (
@@ -192,25 +195,21 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
                 {transaction.category_name || 'Sin categoría'}
               </Text>
             </View>
-            <ArrowRight color="#9CA3AF" size={20} />
+            {transaction.category_id && <ArrowRight color="#9CA3AF" size={20} />}
           </TouchableOpacity>
 
-          <View style={styles.detailRow}>
-            <View style={styles.detailIcon}>
-              <Calendar color="#6B7280" size={20} />
-            </View>
-            <View style={styles.detailTextContainer}>
-              <Text style={styles.detailLabel}>Fecha</Text>
-              <Text style={styles.detailValue}>
-                {formatDate(transaction.date)} • {formatTime(transaction.date)}
-              </Text>
-            </View>
-          </View>
-
+          {/* Account Row */}
           <TouchableOpacity 
             style={styles.detailRow}
             onPress={() => {
               // Navigate to account details if needed
+              navigation.navigate('Main', { 
+                screen: 'Accounts',
+                params: {
+                  screen: 'AccountDetail',
+                  params: { accountId: transaction.account_id },
+                },
+              } as any);
             }}
           >
             <View style={[styles.detailIcon, { backgroundColor: '#EFF6FF' }]}>
@@ -225,6 +224,19 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
             </View>
             <ArrowRight color="#9CA3AF" size={20} />
           </TouchableOpacity>
+
+          {/* Date Row */}
+          <View style={styles.detailRow}>
+            <View style={styles.detailIcon}>
+              <Calendar color="#6B7280" size={20} />
+            </View>
+            <View style={styles.detailTextContainer}>
+              <Text style={styles.detailLabel}>Fecha</Text>
+              <Text style={styles.detailValue}>
+                {formatDate(transaction.date)} • {formatTime(transaction.date)}
+              </Text>
+            </View>
+          </View>
 
           {transaction.notes && (
             <View style={styles.detailRow}>
