@@ -54,6 +54,7 @@ export type BudgetStackParamList = {
 export type AccountStackParamList = {
   AccountList: undefined;
   AccountDetail: { accountId: string };
+  AddAccount: undefined;
 };
 
 export type GoalStackParamList = {

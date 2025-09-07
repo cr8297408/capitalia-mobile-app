@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { AccountListScreen } from '@/features/account-management/account-list/screens/AccountListScreen';
 import { AccountDetailScreen } from '@/features/account-management/account-detail/screens/AccountDetailScreen';
+import { AddAccountScreen } from '@/features/account-management/account-add/screens/AddAccountScreen';
 
 import type { AccountStackParamList } from '../types';
 
@@ -16,6 +17,11 @@ export const AccountStackNavigator: React.FC = () => {
         name="AccountDetail" 
         component={AccountDetailScreen}
         options={{ headerShown: true, title: 'Account Details' }}
+      />
+      <Stack.Screen 
+        name="AddAccount" 
+        component={AddAccountScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
