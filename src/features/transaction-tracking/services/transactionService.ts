@@ -7,12 +7,22 @@ type UpdateTransaction = Database['public']['Tables']['transactions']['Update'];
 
 export type { Transaction, TransactionType };
 
-// This is a workaround for TypeScript to properly type the Supabase client
-const transactionsTable = () => supabase.from('transactions');
+// Define the transaction type with required fields
+type TransactionInsert = Omit<InsertTransaction, 'id' | 'created_at' | 'updated_at'> & {
+  user_id: string;
+  account_id: string;
+  amount: number;
+  type: TransactionType;
+  description: string;
+  category_id: string;
+  date: string;
+  is_recurring: boolean;
+};
 
 export const transactionService = {
   async getRecentTransactionsByAccount(accountId: string, limit = 5): Promise<Transaction[]> {
-    const { data, error } = await transactionsTable()
+    const { data, error } = await supabase
+      .from('transactions')
       .select('*')
       .eq('account_id', accountId)
       .order('date', { ascending: false })
@@ -23,7 +33,8 @@ export const transactionService = {
   },
 
   async getTransactionById(transactionId: string): Promise<Transaction | null> {
-    const { data, error } = await transactionsTable()
+    const { data, error } = await supabase
+      .from('transactions')
       .select('*')
       .eq('id', transactionId)
       .single();
@@ -32,13 +43,17 @@ export const transactionService = {
     return data;
   },
 
-  async createTransaction(transaction: Omit<InsertTransaction, 'id' | 'created_at' | 'updated_at'>): Promise<Transaction> {
-    const { data, error } = await (transactionsTable() as any)
-      .insert(transaction)
+  async createTransaction(transaction: TransactionInsert): Promise<Transaction> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert(transaction as any) // Type assertion to bypass type checking
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating transaction:', error);
+      throw error;
+    }
     if (!data) throw new Error('No data returned from transaction creation');
     return data;
   },
@@ -47,13 +62,14 @@ export const transactionService = {
     transactionId: string,
     updates: Omit<UpdateTransaction, 'id' | 'created_at' | 'updated_at'>
   ): Promise<Transaction> {
-    const updateData: UpdateTransaction = {
+    const updateData = {
       ...updates,
       updated_at: new Date().toISOString(),
     };
     
-    const { data, error } = await (transactionsTable() as any)
-      .update(updateData)
+    const { data, error } = await supabase
+      .from('transactions')
+      .update(updateData as never) // Type assertion to bypass type checking
       .eq('id', transactionId)
       .select()
       .single();
@@ -64,7 +80,8 @@ export const transactionService = {
   },
 
   async deleteTransaction(transactionId: string): Promise<boolean> {
-    const { error } = await transactionsTable()
+    const { error } = await supabase
+      .from('transactions')
       .delete()
       .eq('id', transactionId);
 
@@ -75,9 +92,6 @@ export const transactionService = {
   // Helper function to format transaction amount with currency
   formatTransactionAmount(transaction: { amount: number; type: TransactionType }, currency: string): string {
     const sign = transaction.type === 'expense' ? '-' : '';
-    return `${sign}${currency} ${Math.abs(transaction.amount).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return `${sign}${currency}${Math.abs(transaction.amount).toFixed(2)}`;
   },
 };

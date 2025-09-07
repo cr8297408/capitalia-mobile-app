@@ -3,6 +3,7 @@ import { transactionService } from '../services/transactionService';
 import type { TransactionType } from '@/types/supabase';
 
 type CreateTransactionParams = {
+  user_id: string;
   account_id: string;
   amount: number;
   type: TransactionType;

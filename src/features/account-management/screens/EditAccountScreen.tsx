@@ -15,6 +15,7 @@ import { accountService } from '../services/accountService';
 import type { Database } from '@/types/supabase';
 import { useTransactionService } from '@/features/transaction-tracking/hooks/useTransactionService';
 import { categoryService } from '@/features/transaction-tracking/services/categoryService';
+import { supabase } from '@/infrastructure/supabase/client';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 
@@ -90,7 +91,15 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
           console.warn('No adjustment category found, using default category');
         }
         
+        // Get current user ID from Supabase auth
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+
         await createTransaction({
+          user_id: user.id,
           account_id: accountId,
           amount,
           type: transactionType,
