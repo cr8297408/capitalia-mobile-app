@@ -12,14 +12,29 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders })
   }
 
   try {
     const url = new URL(req.url)
-    const userId = url.searchParams.get('userId')
+    let userId = url.searchParams.get('userId')
+
+    // Also support JSON body payloads (e.g., supabase.functions.invoke with POST body)
+    if (!userId) {
+      try {
+        const contentType = req.headers.get('content-type') || ''
+        if (req.method !== 'GET' && contentType.includes('application/json')) {
+          const body = await req.json().catch(() => null)
+          if (body && typeof body === 'object' && 'userId' in body) {
+            userId = body.userId
+          }
+        }
+      } catch (_) {
+        // ignore body parse errors and fall through to error handling below
+      }
+    }
 
     if (!userId) {
       throw new Error('Missing required parameter: userId')
@@ -83,11 +98,12 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
     console.error('Get subscription status error:', error)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
