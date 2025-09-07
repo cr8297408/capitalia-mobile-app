@@ -11,7 +11,11 @@ export const useAddAccount = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const saveAccount = useCallback(
-    async ({ name, balance }: { name: string; balance: string }): Promise<SaveAccountResult> => {
+    async ({ name, balance, accountType }: { 
+      name: string; 
+      balance: string; 
+      accountType: 'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan' 
+    }): Promise<SaveAccountResult> => {
       try {
         if (isSaving) return { ok: false, code: 'error', message: 'Already saving' };
 
@@ -50,7 +54,7 @@ export const useAddAccount = () => {
           userId: user.id,
           name: trimmedName,
           balance: Number(balanceValue.toFixed(2)),
-          accountType: 'checking',
+          accountType,
           currency: 'USD',
         });
 
