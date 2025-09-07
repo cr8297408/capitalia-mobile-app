@@ -19,8 +19,8 @@ import {
   TrendingUp 
 } from 'lucide-react-native';
 import type { AccountStackScreenProps, RootStackParamList } from '@/navigation/types';
-import { useAccountDetail } from '@/features/account-management/hooks/useAccountDetail';
-import { useHeaderAccountDetail } from '@/features/account-management/hooks/useHeaderAccountDetail';
+import { useAccountDetail } from '../hooks/useAccountDetail';
+import { useHeaderAccountDetail } from '../hooks/useHeaderAccountDetail';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
 import screenStyles from './AccountDetailScreen.styles';
 
