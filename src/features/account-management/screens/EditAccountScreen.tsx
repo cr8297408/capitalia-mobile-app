@@ -19,10 +19,17 @@ import { supabase } from '@/infrastructure/supabase/client';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 
-type EditAccountScreenProps = RootStackScreenProps<'EditAccount'>;
+type EditAccountScreenProps = RootStackScreenProps<'EditAccount'> & {
+  route: {
+    params: {
+      accountId: string;
+      onGoBack?: () => void;
+    };
+  };
+};
 
 export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation, route }) => {
-  const { accountId } = route.params;
+  const { accountId, onGoBack } = route.params;
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
   const [originalBalance, setOriginalBalance] = useState(0);
@@ -57,65 +64,85 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
 
   const handleSave = async () => {
     if (!name || !balance) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
     const newBalance = parseFloat(balance);
     if (isNaN(newBalance)) {
-      Alert.alert('Error', 'Please enter a valid balance');
+      Alert.alert('Error', 'Por favor ingresa un saldo válido');
       return;
     }
 
     const balanceDifference = newBalance - originalBalance;
-    const isBalanceChanged = Math.abs(balanceDifference) > 0.01; // Using a small epsilon for float comparison
+    const isBalanceChanged = Math.abs(balanceDifference) > 0.01; // Usando un pequeño épsilon para comparación de decimales
 
     try {
       setIsSaving(true);
       
-      // Update the account first
-      await accountService.updateAccount(accountId, {
+      // Primero actualizamos la cuenta
+      const updatedAccount = await accountService.updateAccount(accountId, {
         name,
-        balance: newBalance,
       });
-      
-          // Create an adjustment transaction if balance changed
-      if (isBalanceChanged) {
-        const transactionType: 'income' | 'expense' = balanceDifference > 0 ? 'income' : 'expense';
-        const amount = Math.abs(balanceDifference);
-        
-        // Get the adjustment category ID
-        const adjustmentCategoryId = await categoryService.getAdjustmentCategory();
-        
-        if (!adjustmentCategoryId) {
-          console.warn('No adjustment category found, using default category');
-        }
-        
-        // Get current user ID from Supabase auth
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          throw new Error('User not authenticated');
-        }
 
-        await createTransaction({
-          user_id: user.id,
-          account_id: accountId,
-          amount,
-          type: transactionType,
-          description: 'Ajuste de saldo',
-          category_id: adjustmentCategoryId || '',
-          date: new Date().toISOString(),
-          is_recurring: false,
-          notes: `Ajuste de saldo de $${originalBalance.toFixed(2)} a $${newBalance.toFixed(2)}`,
-        });
+      if (!updatedAccount) {
+        throw new Error('Error al actualizar la cuenta');
       }
       
-      Alert.alert('Success', 'Account updated successfully');
+      // Luego creamos la transacción de ajuste si hay cambio de saldo
+      if (isBalanceChanged) {
+        try {
+          const transactionType: 'income' | 'expense' = balanceDifference > 0 ? 'income' : 'expense';
+          const amount = Math.abs(balanceDifference);
+          
+          // Obtenemos el ID de la categoría de ajuste
+          const adjustmentCategoryId = await categoryService.getAdjustmentCategory();
+          
+          if (!adjustmentCategoryId) {
+            console.warn('No se encontró categoría de ajuste, usando categoría por defecto');
+          }
+          
+          // Obtenemos el ID del usuario autenticado
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (!user) {
+            throw new Error('Usuario no autenticado');
+          }
+
+          // Creamos la transacción
+          // Si es un gasto, el monto debe ser negativo
+          const transactionAmount = transactionType === 'expense' ? -amount : amount;
+          
+          await createTransaction({
+            user_id: user.id,
+            account_id: accountId,
+            amount: transactionAmount,
+            type: transactionType,
+            description: 'Ajuste de saldo',
+            category_id: adjustmentCategoryId || '',
+            date: new Date().toISOString(),
+            is_recurring: false,
+            notes: `Ajuste de saldo de $${originalBalance.toFixed(2)} a $${newBalance.toFixed(2)}`,
+          });
+        } catch (txError) {
+          console.error('Error creating adjustment transaction:', txError);
+          // No hacemos throw aquí para no revertir la actualización del saldo
+          // Solo mostramos una alerta al usuario
+          Alert.alert(
+            'Aviso', 
+            'La cuenta se actualizó correctamente, pero hubo un error al crear la transacción de ajuste.'
+          );
+        }
+      }
+      
+      Alert.alert('Éxito', 'La cuenta se ha actualizado correctamente');
+      if (onGoBack) {
+        onGoBack();
+      }
       navigation.goBack();
     } catch (error) {
       console.error('Error updating account:', error);
-      Alert.alert('Error', 'Failed to update account');
+      Alert.alert('Error', 'No se pudo actualizar la cuenta. Por favor, inténtalo de nuevo.');
     } finally {
       setIsSaving(false);
     }

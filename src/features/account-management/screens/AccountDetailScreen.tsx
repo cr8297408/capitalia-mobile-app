@@ -58,7 +58,10 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
 
   const handleEdit = () => {
     if (!account) return;
-    navigation.navigate('EditAccount', { accountId: account.id });
+    navigation.navigate('EditAccount', { 
+      accountId: account.id,
+      onGoBack: () => refreshAll()
+    });
   };
 
   const handleDelete = async () => {
