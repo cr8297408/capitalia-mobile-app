@@ -1,0 +1,65 @@
+import { supabase } from '@/infrastructure/supabase/client';
+import type { Database } from '@/types/supabase';
+
+type Category = Database['public']['Tables']['categories']['Row'];
+type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
+type CategoryUpdate = Database['public']['Tables']['categories']['Update'];
+
+type CategoryId = {
+  id: string;
+};
+
+export const categoryService = {
+  async getCategoryByName(name: string): Promise<Category | null> {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .ilike('name', `%${name}%`)
+      .limit(1)
+      .single<Category>();
+
+    if (error) {
+      console.error('Error fetching category:', error);
+      return null;
+    }
+    return data;
+  },
+
+  async getAdjustmentCategory(): Promise<string | null> {
+    try {
+      // First try to find 'Ajuste' category
+      const ajusteCategory = await this.getCategoryByName('Ajuste');
+      if (ajusteCategory) return ajusteCategory.id;
+
+      // If not found, try 'Ajuste de Saldo' or similar
+      const balanceAdjustment = await this.getCategoryByName('Ajuste de Saldo');
+      if (balanceAdjustment) return balanceAdjustment.id;
+
+      // If still not found, try to find any system default category that might be used for adjustments
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('is_system_default', true)
+        .or('name.ilike.%ajuste%,name.ilike.%balance%')
+        .limit(1)
+        .single<CategoryId>();
+
+      if (error || !data) {
+        console.warn('No adjustment category found, using first available category');
+        // As a fallback, get the first available category
+        const { data: firstCategory } = await supabase
+          .from('categories')
+          .select('id')
+          .limit(1)
+          .single<CategoryId>();
+        
+        return firstCategory?.id || null;
+      }
+
+      return data.id;
+    } catch (error) {
+      console.error('Error getting adjustment category:', error);
+      return null;
+    }
+  },
+};

@@ -13,6 +13,8 @@ import { X, Save, Trash2 } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
 import { accountService } from '../services/accountService';
 import type { Database } from '@/types/supabase';
+import { useTransactionService } from '@/features/transaction-tracking/hooks/useTransactionService';
+import { categoryService } from '@/features/transaction-tracking/services/categoryService';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 
@@ -22,9 +24,11 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
   const { accountId } = route.params;
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
+  const [originalBalance, setOriginalBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { createTransaction } = useTransactionService();
 
   // Fetch account details
   useEffect(() => {
@@ -37,6 +41,7 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
           const account = data as unknown as Account;
           setName(account.name);
           setBalance(account.balance.toString());
+          setOriginalBalance(account.balance);
         }
       } catch (error) {
         console.error('Error fetching account:', error);
@@ -55,18 +60,47 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
       return;
     }
 
-    const balanceValue = parseFloat(balance);
-    if (isNaN(balanceValue)) {
+    const newBalance = parseFloat(balance);
+    if (isNaN(newBalance)) {
       Alert.alert('Error', 'Please enter a valid balance');
       return;
     }
 
+    const balanceDifference = newBalance - originalBalance;
+    const isBalanceChanged = Math.abs(balanceDifference) > 0.01; // Using a small epsilon for float comparison
+
     try {
       setIsSaving(true);
+      
+      // Update the account first
       await accountService.updateAccount(accountId, {
         name,
-        balance: balanceValue,
+        balance: newBalance,
       });
+      
+          // Create an adjustment transaction if balance changed
+      if (isBalanceChanged) {
+        const transactionType: 'income' | 'expense' = balanceDifference > 0 ? 'income' : 'expense';
+        const amount = Math.abs(balanceDifference);
+        
+        // Get the adjustment category ID
+        const adjustmentCategoryId = await categoryService.getAdjustmentCategory();
+        
+        if (!adjustmentCategoryId) {
+          console.warn('No adjustment category found, using default category');
+        }
+        
+        await createTransaction({
+          account_id: accountId,
+          amount,
+          type: transactionType,
+          description: 'Ajuste de saldo',
+          category_id: adjustmentCategoryId || '',
+          date: new Date().toISOString(),
+          is_recurring: false,
+          notes: `Ajuste de saldo de $${originalBalance.toFixed(2)} a $${newBalance.toFixed(2)}`,
+        });
+      }
       
       Alert.alert('Success', 'Account updated successfully');
       navigation.goBack();
