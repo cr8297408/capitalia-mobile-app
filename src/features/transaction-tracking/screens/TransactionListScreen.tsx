@@ -56,6 +56,10 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
     navigation.navigate('EditTransaction', { transactionId: transaction.id });
   }, [navigation]);
 
+  const handleTransactionPress = useCallback((transaction: { id: string }) => {
+    navigation.navigate('TransactionDetail', { transactionId: transaction.id });
+  }, [navigation]);
+
   const handleDelete = useCallback((transactionId: string) => {
     Alert.alert(
       'Eliminar transacción',
@@ -75,12 +79,18 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
   }, [deleteTransaction]);
 
   const renderItem = useCallback(({ item }: { item: any }) => (
-    <TransactionItem
-      transaction={item}
-      onEdit={handleEditTransaction}
-      onDelete={handleDelete}
-    />
-  ), [handleEditTransaction, handleDelete]);
+    <TouchableOpacity 
+      onPress={() => handleTransactionPress(item)}
+      activeOpacity={0.7}
+    >
+      <TransactionItem
+        key={item.id}
+        transaction={item}
+        onEdit={handleEditTransaction}
+        onDelete={handleDelete}
+      />
+    </TouchableOpacity>
+  ), [handleEditTransaction, handleDelete, handleTransactionPress]);
 
   const renderFooter = useCallback(() => {
     if (!isLoading || !transactions.length) return null;
