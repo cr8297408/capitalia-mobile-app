@@ -94,6 +94,37 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
     }
   };
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Detalle de transacción',
+      headerTitleAlign: 'left',
+      headerLeft: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={{ padding: 8, marginLeft: 8 }}
+        >
+          <ArrowLeft color="#111827" size={24} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <View style={{ flexDirection: 'row', marginRight: 8 }}>
+          <TouchableOpacity 
+            onPress={handleEdit} 
+            style={{ padding: 8 }}
+          >
+            <Edit3 color="#2563EB" size={24} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleDelete} 
+            style={{ padding: 8, marginLeft: 8 }}
+          >
+            <Trash2 color="#EF4444" size={24} />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, handleEdit, handleDelete]);
+
   if (isLoading) {
     return (
       <View style={[styles.container, styles.center]}>
@@ -117,22 +148,9 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <ArrowLeft color="#111827" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Detalle de transacción</Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={handleEdit} style={styles.iconButton}>
-            <Edit3 color="#2563EB" size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
-            <Trash2 color="#EF4444" size={24} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        contentContainerStyle={[styles.content]}
+      >
         <View style={styles.amountContainer}>
           <View style={[styles.amountIcon, { backgroundColor: `${amountColor}1A` }]}>
             {getTransactionIcon()}
@@ -249,55 +267,35 @@ export const TransactionDetailScreen: React.FC<TransactionDetailScreenProps> = (
 };
 
 const styles = StyleSheet.create({
+  // Layout
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    flex: 1,
-    textAlign: 'center',
-    marginLeft: -40, // Compensate for the back button
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
   },
   content: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    padding: 2,
   },
+  
+  // Amount section
   amountContainer: {
-    padding: 24,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    marginBottom: 8,
+    borderRadius: 12,
+    padding: 24,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
+  
   amountIcon: {
     width: 56,
     height: 56,
@@ -306,77 +304,103 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 16,
   },
+  
   amountTextContainer: {
     flex: 1,
-    flexShrink: 1,
   },
+  
   amountRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
-  amountSymbol: {
-    marginRight: 4,
-    fontSize: 28,
-    lineHeight: 32,
-  },
+  
   amount: {
     fontSize: 28,
     fontWeight: '700',
-    marginBottom: 8,
     flexShrink: 1,
     flexWrap: 'wrap',
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    lineHeight: 32,
+    includeFontPadding: false,
+    textAlignVertical: 'bottom',
   },
+  
+  amountSymbol: {
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 32,
+    marginRight: 4,
+    includeFontPadding: false,
+    textAlignVertical: 'bottom',
+  },
+  
   description: {
     fontSize: 16,
-    color: '#111827',
-    textAlign: 'center',
+    color: '#6B7280',
+    textAlign: 'left',
+    marginTop: 4,
   },
+  
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  // Details section
   detailsContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     margin: 16,
-    padding: 8,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
+  
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
+  
   detailIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
+  
   categoryIcon: {
-    fontSize: 20,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#E5E7EB',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  
   detailTextContainer: {
     flex: 1,
   },
+  
   detailLabel: {
     fontSize: 14,
     color: '#6B7280',
     marginBottom: 2,
   },
+  
   detailValue: {
     fontSize: 16,
     color: '#111827',
     fontWeight: '500',
   },
+  
+  // Upgrade banner
   upgradeBanner: {
     backgroundColor: '#EFF6FF',
     borderRadius: 12,
@@ -384,18 +408,21 @@ const styles = StyleSheet.create({
     margin: 16,
     alignItems: 'center',
   },
+  
   upgradeText: {
     fontSize: 14,
     color: '#1E40AF',
     textAlign: 'center',
     marginBottom: 12,
   },
+  
   upgradeButton: {
     backgroundColor: '#2563EB',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
+  
   upgradeButtonText: {
     color: '#FFFFFF',
     fontWeight: '600',
