@@ -24,6 +24,24 @@ export const transactionListService = {
     toDate,
     isActiveAccount = true,
   }: GetTransactionsParams = {}): Promise<{ data: TransactionWithCategory[]; count: number }> {
+    let accountFilterIds: string[] = [];
+
+    // Si el usuario pide cuentas activas, primero traemos sus IDs
+    if (!accountId && isActiveAccount) {
+      const { data: activeAccounts, error: accountsError } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('is_active', true);
+
+      if (accountsError) {
+        console.error('Error fetching active accounts:', accountsError);
+        throw accountsError;
+      }
+
+      accountFilterIds = (activeAccounts || []).map((acc: any) => acc.id);
+    }
+
+    // Construimos la query principal
     let query = supabase
       .from('transactions')
       .select(`
@@ -34,20 +52,19 @@ export const transactionListService = {
       .order('date', { ascending: false })
       .range(offset, offset + limit - 1);
 
+    // Filtro por cuenta específica
     if (accountId) {
       query = query.eq('account_id', accountId);
+    } else if (isActiveAccount) {
+      query = query.in('account_id', accountFilterIds);
     }
 
+    // Rango de fechas
     if (fromDate) {
       query = query.gte('date', fromDate);
     }
-
     if (toDate) {
       query = query.lte('date', toDate);
-    }
-
-    if (isActiveAccount) {
-      query = query.eq('accounts.is_active', isActiveAccount);
     }
 
     const { data, error, count } = await query;
@@ -57,11 +74,11 @@ export const transactionListService = {
       throw error;
     }
 
-    // Map the data to include category_name in a flat structure
+    // Aplanamos la categoría
     const transactionsWithCategory = (data || []).map((transaction: any) => ({
       ...transaction,
       category_name: transaction.categories?.name || null,
-      categories: undefined // Remove the nested categories object
+      categories: undefined, // quitamos el objeto nested
     })) as unknown as TransactionWithCategory[];
 
     return {
@@ -82,3 +99,4 @@ export const transactionListService = {
     }
   },
 };
+
