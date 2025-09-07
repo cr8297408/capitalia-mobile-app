@@ -1,5 +1,10 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { Transaction } from './transactionService';
+import type { Transaction as BaseTransaction } from './transactionService';
+
+type TransactionWithCategory = BaseTransaction & {
+  categories: { name: string } | null;
+  category_name?: string | null;
+};
 
 type GetTransactionsParams = {
   accountId?: string;
@@ -16,7 +21,7 @@ export const transactionListService = {
     offset = 0,
     fromDate,
     toDate,
-  }: GetTransactionsParams = {}): Promise<{ data: Transaction[]; count: number }> {
+  }: GetTransactionsParams = {}): Promise<{ data: TransactionWithCategory[]; count: number }> {
     let query = supabase
       .from('transactions')
       .select(`
@@ -46,11 +51,11 @@ export const transactionListService = {
     }
 
     // Map the data to include category_name in a flat structure
-    const transactionsWithCategory = (data || []).map(transaction => ({
+    const transactionsWithCategory = (data || []).map((transaction: any) => ({
       ...transaction,
       category_name: transaction.categories?.name || null,
       categories: undefined // Remove the nested categories object
-    }));
+    })) as unknown as TransactionWithCategory[];
 
     return {
       data: transactionsWithCategory,
