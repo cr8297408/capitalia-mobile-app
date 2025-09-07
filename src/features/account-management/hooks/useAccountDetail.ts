@@ -22,7 +22,7 @@ export const useAccountDetail = (accountId: string) => {
       setIsLoading(true);
       setError(null);
       const data = await accountService.getAccountById(accountId);
-      setAccount(data);
+      setAccount(data?.data);
     } catch (err) {
       console.error('Error fetching account:', err);
       setError('Failed to load account details. Please try again.');

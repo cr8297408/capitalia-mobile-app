@@ -26,6 +26,8 @@ type AccountDetailScreenProps = AccountStackScreenProps<'AccountDetail'> & {
 export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route, navigation }) => {
   const { accountId } = route.params;
   const { account, isLoading: isAccountLoading, error: accountError, refresh: refreshAccount } = useAccountDetail(accountId);
+  console.log("🚀 ~ account:", account)
+
   const { transactions, isLoading: isTransactionsLoading, error: transactionsError, refresh: refreshTransactions } = useTransactions(accountId);
 
   const refreshAll = () => {

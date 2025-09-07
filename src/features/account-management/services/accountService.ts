@@ -71,13 +71,49 @@ export const accountService = {
 
   async getAccountById(accountId: string) {
     const db = supabase as SupabaseClient<Database>;
-    const { data, error } = await db
+    return db
       .from('accounts')
       .select('*')
       .eq('id', accountId)
       .single();
+  },
+
+  async updateAccount(
+    accountId: string,
+    updates: {
+      name?: string;
+      balance?: number;
+      account_type?: 'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan';
+      currency?: string;
+      institution_name?: string | null;
+      account_number_last_four?: string | null;
+    }
+  ) {
+    const db = supabase as SupabaseClient<Database>;
+    const updateData = {
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    
+    const { data, error } = await db
+      .from('accounts')
+      .update(updateData as never) // Type assertion needed due to TypeScript limitations
+      .eq('id', accountId)
+      .select()
+      .single();
 
     if (error) throw error;
     return data;
+  },
+
+  async deleteAccount(accountId: string) {
+    const db = supabase as SupabaseClient<Database>;
+    const { error } = await db
+      .from('accounts')
+      .delete()
+      .eq('id', accountId);
+
+    if (error) throw error;
+    return true;
   },
 };
