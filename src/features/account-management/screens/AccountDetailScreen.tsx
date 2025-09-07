@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
   RefreshControl,
@@ -10,9 +9,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
-  ArrowLeft, 
-  Edit, 
-  Trash2, 
   ArrowUpRight, 
   ArrowDownRight, 
   Clock, 
@@ -24,7 +20,9 @@ import {
 } from 'lucide-react-native';
 import type { AccountStackScreenProps, RootStackParamList } from '@/navigation/types';
 import { useAccountDetail } from '@/features/account-management/hooks/useAccountDetail';
+import { useHeaderAccountDetail } from '@/features/account-management/hooks/useHeaderAccountDetail';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
+import screenStyles from './AccountDetailScreen.styles';
 
 type AccountDetailScreenProps = AccountStackScreenProps<'AccountDetail'> & {
   navigation: AccountStackScreenProps<'AccountDetail'>['navigation'] & {
@@ -74,41 +72,16 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
     refreshTransactions();
   };
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Account Details',
-      headerTitleAlign: 'left',
-      headerLeft: () => (
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()} 
-          style={{ padding: 8, marginLeft: 8 }}
-        >
-          <ArrowLeft color="#111827" size={24} />
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <View style={{ flexDirection: 'row', marginRight: 8 }}>
-          <TouchableOpacity 
-            onPress={handleEdit} 
-            style={{ padding: 8 }}
-          >
-            <Edit color="#2563EB" size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={handleDelete} 
-            style={{ padding: 8, marginLeft: 8 }}
-          >
-            <Trash2 color="#EF4444" size={24} />
-          </TouchableOpacity>
-        </View>
-      ),
-    });
-  }, [navigation, account]);
+  useHeaderAccountDetail({
+    navigation,
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+  });
 
   if (isAccountLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
+      <SafeAreaView style={screenStyles.container}>
+        <View style={screenStyles.loadingContainer}>
           <ActivityIndicator size="large" color="#2563EB" />
         </View>
       </SafeAreaView>
@@ -117,11 +90,11 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
 
   if (accountError || !account) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <AlertCircle size={48} color="#EF4444" style={styles.errorIcon} />
-          <Text style={styles.errorText}>{accountError || 'Account not found'}</Text>
-          <Text style={styles.retryText} onPress={refreshAll}>
+      <SafeAreaView style={screenStyles.container}>
+        <View style={screenStyles.errorContainer}>
+          <AlertCircle size={48} color="#EF4444" style={screenStyles.errorIcon} />
+          <Text style={screenStyles.errorText}>{accountError || 'Account not found'}</Text>
+          <Text style={screenStyles.retryText} onPress={refreshAll}>
             Tap to retry
           </Text>
         </View>
@@ -130,10 +103,10 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={screenStyles.container}>
 
       <ScrollView 
-        style={styles.content}
+        style={screenStyles.scrollView}
         refreshControl={
           <RefreshControl
             refreshing={isAccountLoading || isTransactionsLoading}
@@ -141,18 +114,18 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
             colors={['#2563EB']}
           />
         }>
-        <View style={styles.accountCard}>
-          <View style={styles.accountHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: '#EFF6FF' }]}>
+        <View style={screenStyles.accountCard}>
+          <View style={screenStyles.accountHeader}>
+            <View style={[screenStyles.iconContainer, { backgroundColor: '#EFF6FF' }]}>
               {getAccountIcon(account.account_type)}
             </View>
-            <View style={styles.accountInfo}>
-              <Text style={styles.accountName}>{account.name}</Text>
-              <Text style={styles.accountType}>
+            <View style={screenStyles.accountInfo}>
+              <Text style={screenStyles.accountName}>{account.name}</Text>
+              <Text style={screenStyles.accountType}>
                 {account.account_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Text>
             </View>
-            <Text style={styles.balance}>
+            <Text style={screenStyles.balance}>
               {account.currency} {Number(account.balance).toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -160,99 +133,90 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
             </Text>
           </View>
 
-          <View style={styles.detailsContainer}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Account Number</Text>
-              <Text style={styles.detailValue}>{account.id.substring(0, 8).toUpperCase()}</Text>
+          <View style={screenStyles.detailsContainer}>
+            <View style={screenStyles.detailRow}>
+              <Text style={screenStyles.detailLabel}>Account Number</Text>
+              <Text style={screenStyles.detailValue}>{account.id.substring(0, 8).toUpperCase()}</Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Currency</Text>
-              <Text style={styles.detailValue}>{account.currency}</Text>
+            <View style={screenStyles.detailRow}>
+              <Text style={screenStyles.detailLabel}>Currency</Text>
+              <Text style={screenStyles.detailValue}>{account.currency}</Text>
             </View>
             {account.created_at && (
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Created</Text>
-                <Text style={styles.detailValue}>{formatDate(account.created_at)}</Text>
+              <View style={screenStyles.detailRow}>
+                <Text style={screenStyles.detailLabel}>Created</Text>
+                <Text style={screenStyles.detailValue}>{formatDate(account.created_at)}</Text>
               </View>
             )}
             {account.updated_at && (
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Last Updated</Text>
-                <Text style={styles.detailValue}>{formatDate(account.updated_at)}</Text>
+              <View style={screenStyles.detailRow}>
+                <Text style={screenStyles.detailLabel}>Last Updated</Text>
+                <Text style={screenStyles.detailValue}>{formatDate(account.updated_at)}</Text>
               </View>
             )}
           </View>
         </View>
 
         {/* Transactions List */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+        <View style={screenStyles.section}>
+          <View style={screenStyles.sectionHeader}>
+            <Text style={screenStyles.sectionTitle}>Recent Transactions</Text>
             <TouchableOpacity 
-              onPress={() => navigation.navigate('TransactionDetail', { transactionId: 'temp-id' })} // TODO: Update with correct navigation once TransactionList is implemented
-              style={styles.viewAllButton}
+              style={screenStyles.viewAllButton}
+              onPress={() => navigation.navigate('TransactionList', { accountId })}
             >
-              <Text style={styles.viewAllText}>View All</Text>
+              <Text style={screenStyles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
           
           {isTransactionsLoading && !transactions.length ? (
-            <View style={styles.placeholderContainer}>
+            <View style={screenStyles.placeholderContainer}>
               <ActivityIndicator size="small" color="#2563EB" />
-              <Text style={styles.placeholderText}>Loading transactions...</Text>
+              <Text style={screenStyles.placeholderText}>Loading transactions...</Text>
             </View>
           ) : transactionsError ? (
-            <View style={styles.placeholderContainer}>
-              <AlertCircle size={24} color="#EF4444" style={styles.errorIcon} />
-              <Text style={[styles.placeholderText, { color: '#EF4444' }]}>
-                {transactionsError.message}
-              </Text>
-              <TouchableOpacity onPress={refreshTransactions} style={styles.retryButton}>
-                <Text style={styles.retryButtonText}>Try Again</Text>
+            <View style={screenStyles.placeholderContainer}>
+              <AlertCircle size={24} color="#EF4444" style={screenStyles.placeholderIcon} />
+              <Text style={screenStyles.placeholderText}>Failed to load transactions</Text>
+              <TouchableOpacity style={screenStyles.retryButton} onPress={refreshTransactions}>
+                <Text style={screenStyles.retryButtonText}>Try Again</Text>
               </TouchableOpacity>
             </View>
           ) : transactions.length === 0 ? (
-            <View style={styles.placeholderContainer}>
-              <Clock size={24} color="#9CA3AF" style={styles.placeholderIcon} />
-              <Text style={styles.placeholderText}>No recent transactions</Text>
+            <View style={screenStyles.placeholderContainer}>
+              <Clock size={24} color="#9CA3AF" style={screenStyles.placeholderIcon} />
+              <Text style={screenStyles.placeholderText}>No transactions yet</Text>
             </View>
           ) : (
-            <View style={styles.transactionsList}>
+            <View style={screenStyles.transactionsList}>
               {transactions.map((transaction) => (
                 <TouchableOpacity 
                   key={transaction.id}
-                  style={styles.transactionItem}
+                  style={screenStyles.transactionItem}
                   onPress={() => navigation.navigate('TransactionDetail', { transactionId: transaction.id })}
                 >
-                  <View style={styles.transactionIcon}>
+                  <View style={screenStyles.transactionIcon}>
                     {transaction.type === 'income' ? (
                       <ArrowDownRight size={20} color="#10B981" />
                     ) : (
                       <ArrowUpRight size={20} color="#EF4444" />
                     )}
                   </View>
-                  <View style={styles.transactionInfo}>
-                    <Text style={styles.transactionDescription} numberOfLines={1}>
+                  <View style={screenStyles.transactionInfo}>
+                    <Text style={screenStyles.transactionDescription} numberOfLines={1}>
                       {transaction.description || 'No description'}
                     </Text>
-                    <Text style={styles.transactionCategory}>
-                      {transaction.category_id || 'Uncategorized'}
-                    </Text>
-                    <Text style={styles.transactionDate}>
+                    <Text style={screenStyles.transactionDate}>
                       {formatDate(transaction.date)}
                     </Text>
                   </View>
                   <Text 
                     style={[
-                      styles.transactionAmount,
-                      { color: transaction.type === 'income' ? '#10B981' : '#111827' }
+                      screenStyles.transactionAmount,
+                      transaction.type === 'income' ? screenStyles.incomeAmount : screenStyles.expenseAmount
                     ]}
                   >
-                    {transaction.type === 'expense' ? '-' : ''}{account?.currency} 
-                    {Math.abs(transaction.amount).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                    {transaction.type === 'income' ? '+' : '-'} {account?.currency || '$'} {Math.abs(Number(transaction.amount)).toFixed(2)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -264,197 +228,4 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  errorIcon: {
-    marginBottom: 16,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#111827',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  retryText: {
-    color: '#2563EB',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
-  viewAllButton: {
-    padding: 4,
-  },
-  viewAllText: {
-    color: '#2563EB',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  retryButton: {
-    marginTop: 8,
-    padding: 8,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 6,
-    alignSelf: 'center',
-  },
-  retryButtonText: {
-    color: '#2563EB',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  placeholderIcon: {
-    marginBottom: 8,
-  },
-  transactionsList: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginHorizontal: 16,
-    overflow: 'hidden',
-  },
-  transactionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  section: {
-    marginTop: 16,
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  transactionInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  transactionDescription: {
-    fontSize: 14,
-    color: '#111827',
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  transactionCategory: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 2,
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-  transactionAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  accountCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    margin: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  accountHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  accountInfo: {
-    flex: 1,
-  },
-  accountName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  accountType: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  balance: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  detailsContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 16,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  detailValue: {
-    fontSize: 14,
-    color: '#111827',
-    fontWeight: '500',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
-  placeholderContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginHorizontal: 16,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    color: '#6B7280',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-});
+export default AccountDetailScreen;
