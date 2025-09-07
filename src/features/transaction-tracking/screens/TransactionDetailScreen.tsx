@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   
   amount: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     flexShrink: 1,
     flexWrap: 'wrap',
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   
   amountSymbol: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     lineHeight: 32,
     marginRight: 4,
