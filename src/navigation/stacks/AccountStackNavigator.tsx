@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { AccountListScreen } from '@/features/account-management/screens/AccountListScreen';
+import { AccountListScreen } from '@/features/account-management/account-list/screens/AccountListScreen';
 import { AccountDetailScreen } from '@/features/account-management/account-detail/screens/AccountDetailScreen';
 
 import type { AccountStackParamList } from '../types';
