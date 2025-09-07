@@ -1,20 +1,14 @@
 import React, { useCallback } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  ListRenderItem,
-} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import { useAccountList } from '@/features/account-management/account-list/hooks/useAccountList';
+import { AccountItem } from '@/features/account-management/account-list/components/AccountItem';
 import { styles } from '@/features/account-management/account-list/screens/AccountListScreen.styles';
-import type { AccountItem } from '@/features/account-management/account-list/types/account.types';
+import type { AccountItem as AccountItemType } from '@/features/account-management/account-list/types/account.types';
 
 export const AccountListScreen: React.FC = () => {
   const {
@@ -35,22 +29,11 @@ export const AccountListScreen: React.FC = () => {
     }, [refresh])
   );
 
-  const renderAccountItem: ListRenderItem<AccountItem> = useCallback(({ item }) => (
-    <TouchableOpacity 
-      style={styles.accountItem}
-      onPress={() => handleAccountPress(item.id)}
-      activeOpacity={0.7}
-    >
-      <View style={{ flex: 1 }}>
-        <Text style={styles.accountName}>{item.name}</Text>
-        <Text style={styles.accountMeta}>
-          {item.account_type.replace(/_/g, ' ')}
-        </Text>
-      </View>
-      <Text style={styles.accountBalance}>
-        {item.currency} {Number(item.balance).toFixed(2)}
-      </Text>
-    </TouchableOpacity>
+  const renderAccountItem = useCallback(({ item }: { item: AccountItemType }) => (
+    <AccountItem 
+      account={item} 
+      onPress={handleAccountPress} 
+    />
   ), [handleAccountPress]);
 
   const renderSeparator = useCallback(() => (
