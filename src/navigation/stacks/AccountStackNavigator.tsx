@@ -2,7 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import { AccountListScreen } from '@/features/account-management/screens/AccountListScreen';
-import { AccountDetailScreen } from '@/features/account-management/AccountDetail/screens/AccountDetailScreen';
+import { AccountDetailScreen } from '@/features/account-management/account-detail/screens/AccountDetailScreen';
 
 import type { AccountStackParamList } from '../types';
 
