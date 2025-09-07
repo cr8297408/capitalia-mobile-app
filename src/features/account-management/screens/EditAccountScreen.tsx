@@ -19,17 +19,10 @@ import { supabase } from '@/infrastructure/supabase/client';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 
-type EditAccountScreenProps = RootStackScreenProps<'EditAccount'> & {
-  route: {
-    params: {
-      accountId: string;
-      onGoBack?: () => void;
-    };
-  };
-};
+type EditAccountScreenProps = RootStackScreenProps<'EditAccount'>;
 
 export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation, route }) => {
-  const { accountId, onGoBack } = route.params;
+  const { accountId } = route.params;
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
   const [originalBalance, setOriginalBalance] = useState(0);
@@ -136,9 +129,6 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
       }
       
       Alert.alert('Éxito', 'La cuenta se ha actualizado correctamente');
-      if (onGoBack) {
-        onGoBack();
-      }
       navigation.goBack();
     } catch (error) {
       console.error('Error updating account:', error);

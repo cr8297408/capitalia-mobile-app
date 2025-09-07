@@ -15,8 +15,8 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import type { StackScreenProps } from '@react-navigation/stack';
 import type { RootStackParamList } from '@/navigation/types';
-import { useTransactionList } from '../hooks/useTransactionList';
-import { TransactionItem } from '../components/TransactionItem';
+import { useTransactionList } from '@/shared/hooks/useTransactionList';
+import { TransactionItem } from '@/features/transaction-tracking/components/TransactionItem';
 
 // Extend the TransactionStackParamList to include TransactionList with params
 declare global {

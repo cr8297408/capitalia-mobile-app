@@ -14,7 +14,7 @@ import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, TrendingUp, AlertCircl
 import type { AccountStackScreenProps, RootStackParamList } from '@/navigation/types';
 import { useAccountDetail } from '@/features/account-management/hooks/useAccountDetail';
 import { accountService } from '@/features/account-management/services/accountService';
-import { useTransactions } from '@/features/transaction-tracking/hooks/useTransactions';
+import { useTransactionList } from '@/shared/hooks/useTransactionList';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react-native';
@@ -30,7 +30,9 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
   const { account, isLoading: isAccountLoading, error: accountError, refresh: refreshAccount } = useAccountDetail(accountId);
   console.log("🚀 ~ account:", account)
 
-  const { transactions, isLoading: isTransactionsLoading, error: transactionsError, refresh: refreshTransactions } = useTransactions(accountId);
+  const { transactions, isLoading: isTransactionsLoading, error: transactionsError, refresh: refreshTransactions } =  useTransactionList({
+    accountId
+  });
 
   const refreshAll = () => {
     refreshAccount();
@@ -58,10 +60,7 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
 
   const handleEdit = () => {
     if (!account) return;
-    navigation.navigate('EditAccount', { 
-      accountId: account.id,
-      onGoBack: () => refreshAll()
-    });
+    navigation.navigate('EditAccount', { accountId: account.id });
   };
 
   const handleDelete = async () => {
@@ -235,7 +234,7 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
             <View style={styles.placeholderContainer}>
               <AlertCircle size={24} color="#EF4444" style={styles.errorIcon} />
               <Text style={[styles.placeholderText, { color: '#EF4444' }]}>
-                {transactionsError}
+                {transactionsError.message}
               </Text>
               <TouchableOpacity onPress={refreshTransactions} style={styles.retryButton}>
                 <Text style={styles.retryButtonText}>Try Again</Text>

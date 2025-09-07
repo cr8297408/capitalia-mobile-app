@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { transactionListService } from '../services/transactionListService';
-import type { Transaction } from '../services/transactionService';
+import { transactionListService } from '../../features/transaction-tracking/services/transactionListService';
+import type { Transaction } from '../../features/transaction-tracking/services/transactionService';
 
 type UseTransactionListProps = {
   accountId?: string;
