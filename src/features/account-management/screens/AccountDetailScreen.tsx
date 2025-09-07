@@ -7,17 +7,24 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Edit, DollarSign, CreditCard, Wallet, TrendingUp, AlertCircle, Trash2 } from 'lucide-react-native';
+import { 
+  ArrowLeft, 
+  Edit, 
+  Trash2, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Clock, 
+  AlertCircle, 
+  DollarSign, 
+  Wallet, 
+  CreditCard, 
+  TrendingUp 
+} from 'lucide-react-native';
 import type { AccountStackScreenProps, RootStackParamList } from '@/navigation/types';
 import { useAccountDetail } from '@/features/account-management/hooks/useAccountDetail';
-import { accountService } from '@/features/account-management/services/accountService';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
-import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
-import { ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react-native';
 
 type AccountDetailScreenProps = AccountStackScreenProps<'AccountDetail'> & {
   navigation: AccountStackScreenProps<'AccountDetail'>['navigation'] & {
@@ -27,84 +34,44 @@ type AccountDetailScreenProps = AccountStackScreenProps<'AccountDetail'> & {
 
 export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route, navigation }) => {
   const { accountId } = route.params;
-  const { account, isLoading: isAccountLoading, error: accountError, refresh: refreshAccount } = useAccountDetail(accountId);
-  console.log("🚀 ~ account:", account)
+  
+  const { 
+    account, 
+    isLoading: isAccountLoading, 
+    error: accountError, 
+    refresh: refreshAccount,
+    getAccountIcon: getAccountIconInfo,
+    formatDate,
+    handleEdit,
+    handleDelete,
+  } = useAccountDetail(accountId, navigation);
+  
+  const getAccountIcon = (type: string) => {
+    const { icon, color } = getAccountIconInfo(type);
+    switch (icon) {
+      case 'DollarSign':
+        return <DollarSign size={24} color={color} />;
+      case 'Wallet':
+        return <Wallet size={24} color={color} />;
+      case 'CreditCard':
+        return <CreditCard size={24} color={color} />;
+      case 'TrendingUp':
+        return <TrendingUp size={24} color={color} />;
+      default:
+        return <DollarSign size={24} color={color} />;
+    }
+  };
 
-  const { transactions, isLoading: isTransactionsLoading, error: transactionsError, refresh: refreshTransactions } =  useTransactionList({
-    accountId
-  });
+  const { 
+    transactions, 
+    isLoading: isTransactionsLoading, 
+    error: transactionsError, 
+    refresh: refreshTransactions 
+  } = useTransactionList({ accountId });
 
   const refreshAll = () => {
     refreshAccount();
     refreshTransactions();
-  };
-
-  const getAccountIcon = (type: string) => {
-    switch (type) {
-      case 'checking':
-        return <DollarSign size={24} color="#2563EB" />;
-      case 'savings':
-        return <Wallet size={24} color="#10B981" />;
-      case 'credit_card':
-        return <CreditCard size={24} color="#8B5CF6" />;
-      case 'investment':
-        return <TrendingUp size={24} color="#F59E0B" />;
-      default:
-        return <DollarSign size={24} color="#6B7280" />;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'MMM d, yyyy', { locale: enUS });
-  };
-
-  const handleEdit = () => {
-    if (!account) return;
-    navigation.navigate('EditAccount', { accountId: account.id });
-  };
-
-  const handleDelete = async () => {
-    if (!account) return;
-    
-    Alert.alert(
-      'Eliminar cuenta',
-      '¿Estás seguro de que deseas eliminar esta cuenta? Esta acción no se puede deshacer.',
-      [
-        { 
-          text: 'Cancelar', 
-          style: 'cancel' 
-        },
-        { 
-          text: 'Eliminar', 
-          style: 'destructive', 
-          onPress: async () => {
-            try {
-              await accountService.deleteAccount(account.id);
-              // Show success message
-              Alert.alert(
-                'Cuenta eliminada',
-                'La cuenta se ha eliminado correctamente.',
-                [
-                  { 
-                    text: 'Aceptar',
-                    onPress: () => {
-                      // Navigate back to accounts list
-                      navigation.goBack();
-                    }
-                  }
-                ]
-              );
-            } catch (error) {
-              console.error('Error deleting account:', error);
-              Alert.alert(
-                'Error',
-                'No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo.'
-              );
-            }
-          }
-        },
-      ]
-    );
   };
 
   React.useLayoutEffect(() => {
@@ -202,14 +169,18 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
               <Text style={styles.detailLabel}>Currency</Text>
               <Text style={styles.detailValue}>{account.currency}</Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Created</Text>
-              <Text style={styles.detailValue}>{formatDate(account.created_at)}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Last Updated</Text>
-              <Text style={styles.detailValue}>{formatDate(account.updated_at)}</Text>
-            </View>
+            {account.created_at && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Created</Text>
+                <Text style={styles.detailValue}>{formatDate(account.created_at)}</Text>
+              </View>
+            )}
+            {account.updated_at && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Last Updated</Text>
+                <Text style={styles.detailValue}>{formatDate(account.updated_at)}</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -268,7 +239,7 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
                       {transaction.category_id || 'Uncategorized'}
                     </Text>
                     <Text style={styles.transactionDate}>
-                      {format(new Date(transaction.date), 'MMM d, yyyy', { locale: enUS })}
+                      {formatDate(transaction.date)}
                     </Text>
                   </View>
                   <Text 
