@@ -34,6 +34,13 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
   const { accountId } = route.params;
   
   const { 
+    transactions, 
+    isLoading: isTransactionsLoading, 
+    error: transactionsError, 
+    refresh: refreshTransactions 
+  } = useTransactionList({ accountId });
+
+  const { 
     account, 
     isLoading: isAccountLoading, 
     error: accountError, 
@@ -42,7 +49,16 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
     formatDate,
     handleEdit,
     handleDelete,
-  } = useAccountDetail(accountId, navigation);
+  } = useAccountDetail({ 
+    accountId, 
+    navigation, 
+    refreshTransactions 
+  });
+
+  const refreshAll = () => {
+    refreshAccount();
+    refreshTransactions();
+  };
   
   const getAccountIcon = (type: string) => {
     const { icon, color } = getAccountIconInfo(type);
@@ -58,18 +74,6 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
       default:
         return <DollarSign size={24} color={color} />;
     }
-  };
-
-  const { 
-    transactions, 
-    isLoading: isTransactionsLoading, 
-    error: transactionsError, 
-    refresh: refreshTransactions 
-  } = useTransactionList({ accountId });
-
-  const refreshAll = () => {
-    refreshAccount();
-    refreshTransactions();
   };
 
   useHeaderAccountDetail({

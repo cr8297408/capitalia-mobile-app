@@ -16,7 +16,13 @@ type Account = {
   // Add other account fields as needed
 };
 
-export const useAccountDetail = (accountId: string, navigation: any) => {
+interface UseAccountDetailProps {
+  accountId: string;
+  navigation: any;
+  refreshTransactions?: () => void;
+}
+
+export const useAccountDetail = ({ accountId, navigation, refreshTransactions }: UseAccountDetailProps) => {
   const [account, setAccount] = useState<Account | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,9 +95,13 @@ export const useAccountDetail = (accountId: string, navigation: any) => {
       // Add callback to refresh data when returning from edit screen
       onGoBack: () => {
         refresh();
+        // Also refresh transactions if the function is provided
+        if (refreshTransactions) {
+          refreshTransactions();
+        }
       }
     });
-  }, [navigation, account, refresh]);
+  }, [navigation, account, refresh, refreshTransactions]);
 
   const handleDelete = useCallback(async () => {
     if (!account) return;
