@@ -169,7 +169,10 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
             <Text style={screenStyles.sectionTitle}>Recent Transactions</Text>
             <TouchableOpacity 
               style={screenStyles.viewAllButton}
-              onPress={() => navigation.navigate('TransactionList', { accountId })}
+              onPress={() => navigation.navigate('Transactions', { 
+                screen: 'TransactionList',
+                params: { accountId }
+              })}
             >
               <Text style={screenStyles.viewAllText}>View All</Text>
             </TouchableOpacity>

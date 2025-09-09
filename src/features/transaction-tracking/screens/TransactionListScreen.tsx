@@ -1,4 +1,5 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -13,26 +14,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus } from 'lucide-react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
-import type { StackScreenProps } from '@react-navigation/stack';
-import type { RootStackParamList } from '@/navigation/types';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
 import { TransactionItem } from '@/features/transaction-tracking/components/TransactionItem';
+import type { RootStackScreenProps } from '@/navigation/types';
+import type { Database } from '@/types/supabase';
 
-// Extend the TransactionStackParamList to include TransactionList with params
-declare global {
-  namespace ReactNavigation {
-    interface TransactionListParamList {
-      TransactionList: { accountId?: string };
-    }
-  }
-}
+type Transaction = Database['public']['Tables']['transactions']['Row'];
 
-type TransactionListScreenProps = StackScreenProps<RootStackParamList, 'TransactionList'>;
+type TransactionListScreenProps = RootStackScreenProps<'TransactionList'>;
 
 export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ navigation, route }) => {
   const { isPremium, limits } = useAuth();
   const accountId = route.params?.accountId;
   
+  // Refresh data when screen comes into focus or accountId changes
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [accountId])
+  );
+
   const {
     transactions,
     isLoading,
@@ -46,11 +47,13 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
     accountId,
     limit: 20,
   });
-    console.log("🚀 ~ transactions:", transactions)
 
   const handleAddTransaction = () => {
     navigation.navigate('AddTransaction', { accountId });
   };
+
+  // Set the title based on whether we're filtering by account
+  const screenTitle = accountId ? 'Transacciones de la Cuenta' : 'Todas las Transacciones';
 
   const handleEditTransaction = useCallback((transaction: { id: string }) => {
     navigation.navigate('EditTransaction', { transactionId: transaction.id });
@@ -78,7 +81,12 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
     );
   }, [deleteTransaction]);
 
-  const renderItem = useCallback(({ item }: { item: any }) => (
+  // Type for the transaction item with additional UI properties
+  type TransactionItemType = Transaction & {
+    category_name?: string;
+  };
+
+  const renderItem = useCallback(({ item }: { item: TransactionItemType }) => (
     <TouchableOpacity 
       onPress={() => handleTransactionPress(item)}
       activeOpacity={0.7}
@@ -113,7 +121,7 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Transacciones</Text>
+        <Text style={styles.title}>{screenTitle}</Text>
         <TouchableOpacity 
           style={styles.addButton} 
           onPress={handleAddTransaction}
@@ -123,10 +131,18 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={transactions}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
+      {error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error al cargar las transacciones</Text>
+          <TouchableOpacity onPress={refresh} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Reintentar</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={transactions}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={refresh} />
@@ -136,10 +152,11 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}
         removeClippedSubviews
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={11}
-      />
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={11}
+        />
+      )}
 
       {!isPremium && (
         <UpgradePrompt 
@@ -197,5 +214,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#EF4444',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });

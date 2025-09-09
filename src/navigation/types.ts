@@ -42,7 +42,7 @@ export type MainTabParamList = {
 
 // Nested Stack Navigator Types
 export type TransactionStackParamList = {
-  TransactionList: undefined;
+  TransactionList: { accountId?: string };
   TransactionDetail: { transactionId: string };
 };
 
