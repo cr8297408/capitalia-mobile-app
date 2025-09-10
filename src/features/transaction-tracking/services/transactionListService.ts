@@ -47,7 +47,7 @@ export const transactionListService = {
       .select(`
         *,
         categories:category_id (name),
-        accounts:account_id (id, is_active)
+        accounts:account_id (id, name, is_active)
       `, { count: 'exact' })
       .order('date', { ascending: false })
       .range(offset, offset + limit - 1);

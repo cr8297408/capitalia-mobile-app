@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
@@ -11,11 +11,13 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
+import { Plus, X } from 'lucide-react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
+import { useAccountName } from '../hooks/useAccountName';
 import { TransactionItem } from '@/features/transaction-tracking/components/TransactionItem';
+import { TransactionFilters } from '@/features/transaction-tracking/components/TransactionFilters';
 import type { RootStackScreenProps } from '@/navigation/types';
 import type { Database } from '@/types/supabase';
 
@@ -25,13 +27,19 @@ type TransactionListScreenProps = RootStackScreenProps<'TransactionList'>;
 
 export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ navigation, route }) => {
   const { isPremium, limits } = useAuth();
-  const accountId = route.params?.accountId;
+  const [selectedAccountId, setSelectedAccountId] = useState<string | undefined>(route.params?.accountId);
+  const accountName = useAccountName(selectedAccountId);
+  
+  // Update the URL when the account filter changes
+  useEffect(() => {
+    navigation.setParams({ accountId: selectedAccountId });
+  }, [selectedAccountId, navigation]);
   
   // Refresh data when screen comes into focus or accountId changes
   useFocusEffect(
     useCallback(() => {
       refresh();
-    }, [accountId])
+    }, [selectedAccountId])
   );
 
   const {
@@ -44,16 +52,23 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
     loadMore,
     deleteTransaction,
   } = useTransactionList({
-    accountId,
+    accountId: selectedAccountId,
     limit: 20,
   });
 
   const handleAddTransaction = () => {
-    navigation.navigate('AddTransaction', { accountId });
+    navigation.navigate('AddTransaction', { accountId: selectedAccountId });
+  };
+  
+  const handleClearFilters = () => {
+    setSelectedAccountId(undefined);
   };
 
   // Set the title based on whether we're filtering by account
-  const screenTitle = accountId ? 'Transacciones de la Cuenta' : 'Todas las Transacciones';
+  const screenTitle = selectedAccountId ? 'Transacciones de la Cuenta' : 'Todas las Transacciones';
+  
+  // Check if any filters are active
+  const hasActiveFilters = !!selectedAccountId;
 
   const handleEditTransaction = useCallback((transaction: { id: string }) => {
     navigation.navigate('EditTransaction', { transactionId: transaction.id });
@@ -121,14 +136,22 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{screenTitle}</Text>
-        <TouchableOpacity 
-          style={styles.addButton} 
-          onPress={handleAddTransaction}
-          disabled={!isPremium && transactions.length >= (limits?.maxTransactions || 0)}
-        >
-          <Plus color="#ffffff" size={20} />
-        </TouchableOpacity>
+        <View>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>{screenTitle}</Text>
+            <TouchableOpacity 
+              style={styles.addButton} 
+              onPress={handleAddTransaction}
+              disabled={!isPremium && transactions.length >= (limits?.maxTransactions || 0)}
+            >
+              <Plus color="#ffffff" size={20} />
+            </TouchableOpacity>
+          </View>
+          <TransactionFilters
+            selectedAccountId={selectedAccountId}
+            onSelectAccount={setSelectedAccountId}
+          />
+        </View>
       </View>
 
       {error ? (
@@ -175,14 +198,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  filterTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginRight: 8,
+  },
+  filterTagText: {
+    fontSize: 12,
+    color: '#4B5563',
+    marginRight: 4,
+  },
+  clearButton: {
+    padding: 2,
+    borderRadius: 12,
   },
   title: {
     fontSize: 20,

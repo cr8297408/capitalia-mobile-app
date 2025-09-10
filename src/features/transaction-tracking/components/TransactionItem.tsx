@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Trash2, Pencil } from 'lucide-react-native';
 import type { Transaction as BaseTransaction } from '../services/transactionService';
 
-// Extend the base Transaction type to include category_name
+// Extend the base Transaction type to include additional fields
 interface Transaction extends BaseTransaction {
   category_name?: string;
+  accounts?: {
+    name: string;
+  };
 }
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -21,6 +24,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   onEdit,
   onDelete,
 }) => {
+  console.log("🚀 ~ transaction:", transaction)
   const isExpense = transaction.type === 'expense';
   const amountColor = isExpense ? '#EF4444' : '#10B981';
   const formattedDate = format(new Date(transaction.date), 'PPP', { locale: es });
@@ -28,9 +32,20 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.leftContent}>
-        <Text style={styles.category}>
-          {transaction.category_name || 'Sin categoría'}
-        </Text>
+        <View style={styles.tagsContainer}>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>
+              {transaction.category_name || 'Sin categoría'}
+            </Text>
+          </View>
+          {transaction.accounts && (
+            <View style={[styles.tag, styles.accountTag]}>
+              <Text style={[styles.tagText, styles.accountTagText]}>
+                {transaction.accounts.name}
+              </Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.description} numberOfLines={1}>
           {transaction.description}
         </Text>
@@ -73,6 +88,30 @@ const styles = StyleSheet.create({
   leftContent: {
     flex: 1,
     marginRight: 12,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 4,
+  },
+  tag: {
+    backgroundColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 6,
+    marginBottom: 4,
+  },
+  tagText: {
+    fontSize: 12,
+    color: '#4B5563',
+    fontWeight: '500',
+  },
+  accountTag: {
+    backgroundColor: '#DBEAFE',
+  },
+  accountTagText: {
+    color: '#1E40AF',
   },
   rightContent: {
     alignItems: 'flex-end',
