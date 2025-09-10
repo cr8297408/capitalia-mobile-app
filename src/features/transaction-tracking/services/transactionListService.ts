@@ -8,6 +8,7 @@ type TransactionWithCategory = BaseTransaction & {
 
 type GetTransactionsParams = {
   accountId?: string;
+  categoryId?: string;
   limit?: number;
   offset?: number;
   fromDate?: string;
@@ -18,6 +19,7 @@ type GetTransactionsParams = {
 export const transactionListService = {
   async getTransactions({
     accountId,
+    categoryId,
     limit = 20,
     offset = 0,
     fromDate,
@@ -57,6 +59,11 @@ export const transactionListService = {
       query = query.eq('account_id', accountId);
     } else if (isActiveAccount) {
       query = query.in('account_id', accountFilterIds);
+    }
+
+    // Filtro por categoría
+    if (categoryId) {
+      query = query.eq('category_id', categoryId);
     }
 
     // Rango de fechas

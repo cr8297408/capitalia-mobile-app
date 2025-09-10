@@ -11,7 +11,8 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, X } from 'lucide-react-native';
+import { formatISO } from 'date-fns';
+import { Plus } from 'lucide-react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
@@ -28,12 +29,19 @@ type TransactionListScreenProps = RootStackScreenProps<'TransactionList'>;
 export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ navigation, route }) => {
   const { isPremium, limits } = useAuth();
   const [selectedAccountId, setSelectedAccountId] = useState<string | undefined>(route.params?.accountId);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
+  const [selectedDateRange, setSelectedDateRange] = useState<{startDate?: Date; endDate?: Date}>({});
   const accountName = useAccountName(selectedAccountId);
   
   // Update the URL when the account filter changes
   useEffect(() => {
     navigation.setParams({ accountId: selectedAccountId });
   }, [selectedAccountId, navigation]);
+  
+  // Format date for API if needed
+  const formatDateForApi = (date?: Date) => {
+    return date ? formatISO(date, { representation: 'date' }) : undefined;
+  };
   
   // Refresh data when screen comes into focus or accountId changes
   useFocusEffect(
@@ -53,6 +61,9 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
     deleteTransaction,
   } = useTransactionList({
     accountId: selectedAccountId,
+    categoryId: selectedCategoryId,
+    fromDate: formatDateForApi(selectedDateRange.startDate),
+    toDate: formatDateForApi(selectedDateRange.endDate),
     limit: 20,
   });
 
@@ -62,13 +73,15 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
   
   const handleClearFilters = () => {
     setSelectedAccountId(undefined);
+    setSelectedCategoryId(undefined);
+    setSelectedDateRange({});
   };
 
   // Set the title based on whether we're filtering by account
   const screenTitle = selectedAccountId ? 'Transacciones de la Cuenta' : 'Todas las Transacciones';
   
   // Check if any filters are active
-  const hasActiveFilters = !!selectedAccountId;
+  const hasActiveFilters = !!selectedAccountId || !!selectedCategoryId || selectedDateRange?.startDate || selectedDateRange?.endDate;
 
   const handleEditTransaction = useCallback((transaction: { id: string }) => {
     navigation.navigate('EditTransaction', { transactionId: transaction.id });
@@ -149,7 +162,12 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
           </View>
           <TransactionFilters
             selectedAccountId={selectedAccountId}
+            selectedCategoryId={selectedCategoryId}
+            selectedDateRange={selectedDateRange}
             onSelectAccount={setSelectedAccountId}
+            onSelectCategory={setSelectedCategoryId}
+            onSelectDateRange={setSelectedDateRange as any}
+            onClearAll={handleClearFilters}
           />
         </View>
       </View>

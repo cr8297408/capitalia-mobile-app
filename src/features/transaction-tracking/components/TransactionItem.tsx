@@ -24,7 +24,6 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   onEdit,
   onDelete,
 }) => {
-  console.log("🚀 ~ transaction:", transaction)
   const isExpense = transaction.type === 'expense';
   const amountColor = isExpense ? '#EF4444' : '#10B981';
   const formattedDate = format(new Date(transaction.date), 'PPP', { locale: es });

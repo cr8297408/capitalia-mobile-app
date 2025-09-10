@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { View, StyleSheet, TouchableOpacity, Modal, FlatList, Text } from 'react-native';
+import { Calendar } from 'lucide-react-native';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { supabase } from '@/infrastructure/supabase/client';
 
 type Account = {
@@ -7,109 +10,303 @@ type Account = {
   name: string;
 };
 
+type Category = {
+  id: string;
+  name: string;
+};
+
+type DateRange = {
+  startDate?: Date;
+  endDate?: Date;
+};
+
+type FilterType = 'account' | 'category' | 'date';
+
 type TransactionFiltersProps = {
   selectedAccountId?: string;
+  selectedCategoryId?: string;
+  selectedDateRange?: DateRange;
   onSelectAccount: (accountId?: string) => void;
+  onSelectCategory: (categoryId?: string) => void;
+  onSelectDateRange: Dispatch<SetStateAction<DateRange | undefined>>;
+  onClearAll: () => void;
 };
 
 export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   selectedAccountId,
+  selectedCategoryId,
+  selectedDateRange,
   onSelectAccount,
+  onSelectCategory,
+  onSelectDateRange,
+  onClearAll,
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterType | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tempDateRange, setTempDateRange] = useState<DateRange>({});
+  const [isLoading, setIsLoading] = useState({
+    accounts: true,
+    categories: true,
+  });
 
   useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
+        // Fetch accounts
+        const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
           .select('id, name')
           .order('name', { ascending: true });
 
-        if (error) {
-          console.error('Error fetching accounts:', error);
-          return;
-        }
+        if (accountsError) throw accountsError;
 
-        setAccounts(data || []);
+        // Fetch categories and remove duplicates by ID
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('categories')
+          .select('id, name')
+          .order('name', { ascending: true });
+
+        if (categoriesError) throw categoriesError;
+
+        // Remove duplicate categories by ID
+        const uniqueCategories = Array.from(
+          new Map((categoriesData || []).map((item: { id: string; name: string }) => [item.id, item])).values()
+        ) as Category[];
+
+        setAccounts(accountsData || []);
+        setCategories(uniqueCategories);
       } catch (error) {
-        console.error('Error in fetchAccounts:', error);
+        console.error('Error fetching filter data:', error);
       } finally {
-        setIsLoading(false);
+        setIsLoading(prev => ({
+          ...prev,
+          accounts: false,
+          categories: false,
+        }));
       }
     };
 
-    fetchAccounts();
+    fetchData();
   }, []);
 
   const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
+  const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+  
+  const hasActiveFilters = selectedAccountId || selectedCategoryId || selectedDateRange?.startDate || selectedDateRange?.endDate;
+
+  const renderFilterContent = () => {
+    if (activeFilter === 'account') {
+      return (
+        <View style={styles.filterContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.filterTitle}>Seleccionar cuenta</Text>
+            <TouchableOpacity onPress={() => setActiveFilter(null)}>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+          {isLoading.accounts ? (
+            <Text>Cargando cuentas...</Text>
+          ) : (
+            <FlatList
+              data={accounts}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.filterItem,
+                    selectedAccountId === item.id && styles.selectedFilterItem,
+                  ]}
+                  onPress={() => {
+                    onSelectAccount(item.id);
+                    setActiveFilter(null);
+                  }}
+                >
+                  <Text style={styles.filterItemText}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
+        </View>
+      );
+    }
+
+    if (activeFilter === 'category') {
+      return (
+        <View style={styles.filterContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.filterTitle}>Seleccionar categoría</Text>
+            <TouchableOpacity onPress={() => setActiveFilter(null)}>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+          {isLoading.categories ? (
+            <Text>Cargando categorías...</Text>
+          ) : (
+            <FlatList
+              data={categories}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.filterItem,
+                    selectedCategoryId === item.id && styles.selectedFilterItem,
+                  ]}
+                  onPress={() => {
+                    onSelectCategory(item.id);
+                    setActiveFilter(null);
+                  }}
+                >
+                  <Text style={styles.filterItemText}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
+        </View>
+      );
+    }
+
+    if (activeFilter === 'date') {
+      return (
+        <View style={styles.filterContent}>
+          <Text style={styles.filterTitle}>Seleccionar rango de fechas</Text>
+          <View style={styles.dateInputContainer}>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => {
+                // In a real app, you would open a date picker here
+                // For now, we'll just use a placeholder
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                setTempDateRange({ startDate, endDate });
+              }}
+            >
+              <Text style={styles.dateText}>
+                {tempDateRange.startDate && tempDateRange.endDate
+                  ? `${format(tempDateRange.startDate, 'dd MMM yyyy', { locale: es })} - ${format(tempDateRange.endDate, 'dd MMM yyyy', { locale: es })}`
+                  : 'Seleccionar fechas'}
+              </Text>
+              <Calendar size={16} color="#6B7280" />
+            </TouchableOpacity>
+            <View style={styles.dateButtons}>
+              <TouchableOpacity
+                style={[styles.dateButton, styles.clearDateButton]}
+                onPress={() => {
+                  setTempDateRange({});
+                  onSelectDateRange(undefined);
+                  setActiveFilter(null);
+                }}
+              >
+                <Text style={styles.clearDateText}>Limpiar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dateButton, styles.applyDateButton]}
+                onPress={() => {
+                  onSelectDateRange(tempDateRange);
+                  setActiveFilter(null);
+                }}
+                disabled={!tempDateRange.startDate || !tempDateRange.endDate}
+              >
+                <Text style={styles.applyDateText}>Aplicar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setIsVisible(true)}
-      >
-        <Text style={styles.filterButtonText}>
-          {selectedAccount ? selectedAccount.name : 'Filtrar por cuenta'}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.filterRow}>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            selectedAccountId && styles.activeFilterButton,
+          ]}
+          onPress={() => setActiveFilter('account')}
+        >
+          <Text style={[
+            styles.filterButtonText,
+            selectedAccountId && styles.activeFilterButtonText,
+          ]}>
+            {selectedAccount?.name || 'Cuenta'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            selectedCategoryId && styles.activeFilterButton,
+          ]}
+          onPress={() => setActiveFilter('category')}
+        >
+          <Text style={[
+            styles.filterButtonText,
+            selectedCategoryId && styles.activeFilterButtonText,
+          ]}>
+            {selectedCategory?.name || 'Categoría'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            (selectedDateRange?.startDate || selectedDateRange?.endDate) && styles.activeFilterButton,
+          ]}
+          onPress={() => {
+            setTempDateRange(selectedDateRange || {});
+            setActiveFilter('date');
+          }}
+        >
+          <Text style={[
+            styles.filterButtonText,
+            (selectedDateRange?.startDate || selectedDateRange?.endDate) && styles.activeFilterButtonText,
+          ]}>
+            <Calendar size={14} color={selectedDateRange?.startDate ? '#FFFFFF' : '#4B5563'} />
+            {' '}
+            {selectedDateRange?.startDate && selectedDateRange?.endDate
+              ? `${format(selectedDateRange.startDate, 'dd/MM')} - ${format(selectedDateRange.endDate, 'dd/MM')}`
+              : 'Fechas'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {hasActiveFilters && (
+        <TouchableOpacity
+          style={styles.clearAllButton}
+          onPress={onClearAll}
+        >
+          <Text style={styles.clearAllText}>Limpiar filtros</Text>
+        </TouchableOpacity>
+      )}
 
       <Modal
-        visible={isVisible}
-        animationType="slide"
+        visible={!!activeFilter}
+        animationType="fade"
         transparent={true}
-        onRequestClose={() => setIsVisible(false)}
+        onRequestClose={() => setActiveFilter(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Seleccionar cuenta</Text>
-            
-            {isLoading ? (
-              <Text>Cargando cuentas...</Text>
-            ) : (
-              <FlatList
-                data={accounts}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.accountItem,
-                      selectedAccountId === item.id && styles.selectedAccountItem,
-                    ]}
-                    onPress={() => {
-                      onSelectAccount(item.id);
-                      setIsVisible(false);
-                    }}
-                  >
-                    <Text style={styles.accountName}>{item.name}</Text>
-                  </TouchableOpacity>
-                )}
-                ListEmptyComponent={
-                  <Text style={styles.noAccountsText}>No hay cuentas disponibles</Text>
-                }
-              />
-            )}
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                onPress={() => {
-                  onSelectAccount(undefined);
-                  setIsVisible(false);
-                }}
-                style={[styles.button, styles.clearButton]}
-              >
-                <Text style={styles.clearButtonText}>Limpiar filtro</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setIsVisible(false)}
-                style={[styles.button, styles.closeButton]}
-              >
-                <Text style={styles.closeButtonText}>Cerrar</Text>
-              </TouchableOpacity>
-            </View>
+        <View 
+          style={styles.modalOverlay}
+          onStartShouldSetResponder={() => true}
+          onResponderGrant={() => setActiveFilter(null)}
+        >
+          <View 
+            style={styles.modalContent}
+            onStartShouldSetResponder={() => true}
+            onResponderGrant={(e) => e.stopPropagation()}
+          >
+            {renderFilterContent()}
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={() => setActiveFilter(null)}
+            >
+              <Text style={styles.closeModalText}>Cerrar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -120,80 +317,145 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
+    paddingHorizontal: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
   },
   filterButton: {
-    backgroundColor: '#E5E7EB',
-    paddingHorizontal: 16,
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  activeFilterButton: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
   filterButtonText: {
     color: '#4B5563',
+    fontSize: 14,
     fontWeight: '500',
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 20,
+  activeFilterButtonText: {
+    color: '#FFFFFF',
   },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    maxHeight: '70%',
+  filterContent: {
+    padding: 16,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
-    textAlign: 'center',
+    width: '100%',
   },
-  accountItem: {
+  filterTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  closeButtonText: {
+    color: '#2563EB',
+    fontWeight: '600',
+  },
+  filterItem: {
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  selectedAccountItem: {
+  selectedFilterItem: {
     backgroundColor: '#EFF6FF',
   },
-  accountName: {
+  filterItemText: {
     fontSize: 16,
+    color: '#1F2937',
   },
-  noAccountsText: {
-    textAlign: 'center',
-    padding: 16,
-    color: '#6B7280',
+  dateInputContainer: {
+    marginBottom: 16,
   },
-  modalButtons: {
+  dateInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#1F2937',
+  },
+  dateButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    gap: 8,
   },
-  clearButton: {
+  dateButton: {
     flex: 1,
-    marginRight: 8,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+  },
+  clearDateButton: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#EF4444',
+  },
+  applyDateButton: {
+    backgroundColor: '#2563EB',
     borderColor: '#2563EB',
   },
-  closeButton: {
-    backgroundColor: '#2563EB',
-    marginLeft: 8,
-  },
-  clearButtonText: {
-    color: '#2563EB',
+  clearDateText: {
+    color: '#EF4444',
     fontWeight: '600',
   },
-  closeButtonText: {
+  applyDateText: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    maxHeight: '80%',
+  },
+  closeModalButton: {
+    marginTop: 16,
+    padding: 12,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  closeModalText: {
+    color: '#2563EB',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  clearAllButton: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  clearAllText: {
+    color: '#2563EB',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

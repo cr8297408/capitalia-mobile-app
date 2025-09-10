@@ -5,10 +5,19 @@ import type { Transaction } from '../../features/transaction-tracking/services/t
 
 type UseTransactionListProps = {
   accountId?: string;
+  categoryId?: string;
+  fromDate?: string;
+  toDate?: string;
   limit?: number;
 };
 
-export const useTransactionList = ({ accountId, limit = 20 }: UseTransactionListProps = {}) => {
+export const useTransactionList = ({ 
+  accountId, 
+  categoryId, 
+  fromDate, 
+  toDate, 
+  limit = 20 
+}: UseTransactionListProps = {}) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -27,6 +36,9 @@ export const useTransactionList = ({ accountId, limit = 20 }: UseTransactionList
 
         const { data, count } = await transactionListService.getTransactions({
           accountId,
+          categoryId,
+          fromDate,
+          toDate,
           limit,
           offset: isRefreshing ? 0 : page * limit,
         });
@@ -42,7 +54,7 @@ export const useTransactionList = ({ accountId, limit = 20 }: UseTransactionList
         setIsRefreshing(false);
       }
     },
-    [accountId, limit, page]
+    [accountId, categoryId, fromDate, toDate, limit, page]
   );
 
   const handleRefresh = useCallback(() => {
