@@ -10,17 +10,17 @@ type AccountFormProps = {
   onDelete?: () => Promise<void>;
   isSubmitting: boolean;
   isDeleting?: boolean;
+  onCancel: () => void;
 };
 
 export const AccountForm: React.FC<AccountFormProps> = ({
   initialData,
   onSubmit,
-  onDelete,
   isSubmitting,
   isDeleting = false,
+  onCancel,
 }) => {
   const [formData, setFormData] = useState<EditAccountFormData>(initialData);
-  const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
 
   useEffect(() => {
     setFormData(initialData);
@@ -41,22 +41,6 @@ export const AccountForm: React.FC<AccountFormProps> = ({
       await onSubmit(formData);
     } catch (error) {
       Alert.alert('Error', 'Failed to save account');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!onDelete) return;
-    
-    if (!isDeleteConfirmVisible) {
-      setIsDeleteConfirmVisible(true);
-      return;
-    }
-
-    try {
-      await onDelete();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to delete account');
-      setIsDeleteConfirmVisible(false);
     }
   };
 
@@ -137,23 +121,18 @@ export const AccountForm: React.FC<AccountFormProps> = ({
           </Text>
         </TouchableOpacity>
 
-        {onDelete && (
-          <TouchableOpacity
+        <TouchableOpacity
             style={[
               styles.deleteButton,
-              isDeleteConfirmVisible && styles.deleteConfirmButton,
-              (isSubmitting || isDeleting) && styles.buttonDisabled
+              styles.deleteConfirmButton
             ]}
-            onPress={handleDelete}
+            onPress={onCancel}
             disabled={isSubmitting || isDeleting}
           >
             <Text style={styles.deleteButtonText}>
-              {isDeleteConfirmVisible 
-                ? (isDeleting ? 'Deleting...' : 'Confirm Delete') 
-                : 'Delete Account'}
+              {'Cancel'}
             </Text>
           </TouchableOpacity>
-        )}
       </View>
     </View>
   );

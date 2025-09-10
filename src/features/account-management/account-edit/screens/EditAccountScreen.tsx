@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
 
 import { AccountForm } from '../components/AccountForm';
@@ -140,7 +140,7 @@ export const EditAccountScreen: React.FC<EditAccountScreenProps> = ({ navigation
       <AccountForm 
         initialData={initialData}
         onSubmit={saveAndGoBack}
-        onDelete={handleDelete}
+        onCancel={navigation.goBack}
         isSubmitting={isSaving}
         isDeleting={isDeleting}
       />
