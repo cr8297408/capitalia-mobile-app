@@ -1,8 +1,9 @@
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { View, StyleSheet, TouchableOpacity, Modal, FlatList, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Modal, FlatList, Text, Platform } from 'react-native';
 import { Calendar } from 'lucide-react-native';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { supabase } from '@/infrastructure/supabase/client';
 
 type Account = {
@@ -45,6 +46,8 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tempDateRange, setTempDateRange] = useState<DateRange>({});
+  const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState({
     accounts: true,
     categories: true,
@@ -174,12 +177,8 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => {
-                // In a real app, you would open a date picker here
-                // For now, we'll just use a placeholder
-                const today = new Date();
-                const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                setTempDateRange({ startDate, endDate });
+                setCurrentDate(tempDateRange.startDate || new Date());
+                setShowDatePicker('start');
               }}
             >
               <Text style={styles.dateText}>
@@ -188,6 +187,57 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                   : 'Seleccionar fechas'}
               </Text>
               <Calendar size={16} color="#6B7280" />
+              
+              {showDatePicker && (
+                <DateTimePicker
+                  value={currentDate}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(null);
+                    
+                    if (selectedDate) {
+                      if (showDatePicker === 'start') {
+                        const newStartDate = selectedDate;
+                        const endDate = tempDateRange.endDate || new Date(newStartDate);
+                        
+                        // Si la fecha de inicio es mayor que la de fin, actualizamos ambas
+                        if (newStartDate > endDate) {
+                          setTempDateRange({
+                            startDate: newStartDate,
+                            endDate: newStartDate
+                          });
+                        } else {
+                          setTempDateRange(prev => ({
+                            ...prev,
+                            startDate: newStartDate
+                          }));
+                        }
+                        // Mostrar el selector para la fecha final
+                        setCurrentDate(endDate);
+                        setShowDatePicker('end');
+                      } else {
+                        // Actualizar solo la fecha final si es mayor o igual que la de inicio
+                        const newEndDate = selectedDate;
+                        const startDate = tempDateRange.startDate || new Date();
+                        
+                        if (newEndDate >= startDate) {
+                          setTempDateRange(prev => ({
+                            ...prev,
+                            endDate: newEndDate
+                          }));
+                        } else {
+                          // Si la fecha final es menor, establecer el mismo día
+                          setTempDateRange(prev => ({
+                            ...prev,
+                            endDate: startDate
+                          }));
+                        }
+                      }
+                    }
+                  }}
+                />
+              )}
             </TouchableOpacity>
             <View style={styles.dateButtons}>
               <TouchableOpacity
