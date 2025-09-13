@@ -2,23 +2,26 @@ import React from 'react';
 import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { StatsCard } from './StatsCard';
 import { useTheme } from '@react-navigation/native';
+import { useDashboard } from '../hooks/useDashboard';
 
-type DashboardStatsProps = {
-  totalBalance: number;
-  monthlyIncome: number;
-  monthlyExpenses: number;
-  savingsRate: number;
-  isLoading: boolean;
-};
-
-export const DashboardStats: React.FC<DashboardStatsProps> = ({
-  totalBalance,
-  monthlyIncome,
-  monthlyExpenses,
-  savingsRate,
-  isLoading,
-}) => {
+export const DashboardStats: React.FC = () => {
   const { colors } = useTheme();
+  const {
+    totalBalance,
+    totalBalanceChange,
+    totalBalanceIsPositive,
+    monthlyIncome,
+    monthlyIncomeChange,
+    monthlyIncomeIsPositive,
+    monthlyExpenses,
+    monthlyExpensesChange,
+    monthlyExpensesIsPositive,
+    savingsRate,
+    savingsRateChange,
+    savingsRateIsPositive,
+    isLoading,
+    error,
+  } = useDashboard();
   const windowWidth = Dimensions.get('window').width;
   const cardWidth = (windowWidth - 40) / 2 - 8; // Accounting for margins and padding
 
@@ -43,8 +46,8 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
           title="Total Balance" 
           value={totalBalance} 
           isCurrency 
-          change={2.5}
-          isPositive={true}
+          change={totalBalanceChange}
+          isPositive={totalBalanceIsPositive}
         />
       </View>
       
@@ -53,8 +56,8 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
           title="Monthly Income" 
           value={monthlyIncome} 
           isCurrency 
-          change={5.2}
-          isPositive={true}
+          change={monthlyIncomeChange}
+          isPositive={monthlyIncomeIsPositive}
         />
       </View>
       
@@ -63,8 +66,8 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
           title="Monthly Expenses" 
           value={monthlyExpenses} 
           isCurrency 
-          change={-3.1}
-          isPositive={false}
+          change={monthlyExpensesChange}
+          isPositive={monthlyExpensesIsPositive}
         />
       </View>
       
@@ -73,8 +76,8 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
           title="Savings Rate" 
           value={savingsRate} 
           isPercentage 
-          change={1.8}
-          isPositive={savingsRate > 0}
+          change={savingsRateChange}
+          isPositive={savingsRateIsPositive}
         />
       </View>
     </ScrollView>
