@@ -48,6 +48,8 @@ export type TransactionStackParamList = {
 
 export type BudgetStackParamList = {
   BudgetList: undefined;
+  AddBudget: undefined;
+  EditBudget: { budgetId: string };
   BudgetDetail: { budgetId: string };
 };
 
