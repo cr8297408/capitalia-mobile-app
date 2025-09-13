@@ -54,6 +54,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.1.10",
+    "@types/uuid": "^10.0.0",
     "react-devtools-core": "^6.1.5",
     "react-native-worklets-core": "~1.0.0",
     "typescript": "~5.9.2"

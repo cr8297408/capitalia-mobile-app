@@ -1,6 +1,13 @@
 import { useState, useCallback } from 'react';
 import { accountService } from '@/features/account-management/services/accountService';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { TransactionService } from '@/shared/services/transactionService';
+import { categoryService } from '@/features/transaction-tracking/services/categoryService';
+import type { Database } from '@/shared/types/supabase';
+import { v4 as uuidv4 } from 'uuid';
+
+type Account = Database['public']['Tables']['accounts']['Row'];
+const transactionService = TransactionService.getInstance();
 
 export type SaveAccountResult =
   | { ok: true }
@@ -51,13 +58,35 @@ export const useAddAccount = () => {
 
         setIsSaving(true);
 
-        await accountService.createAccount({
+        // Create the account first
+        const account = await accountService.createAccount({
           userId: user.id,
           name: trimmedName,
-          balance: Number(balanceValue.toFixed(2)),
+          balance: 0,
           accountType,
           currency,
         });
+
+        // Create an initial transaction for the account balance
+        if (balanceValue !== 0) {
+          // Get the 'Other Income' category
+          const otherIncomeCategory = await categoryService.getCategoryByName('Other Income');
+          
+          if (!otherIncomeCategory) {
+            console.warn("'Other Income' category not found, using default category");
+          }
+
+          await transactionService.createTransaction({
+            user_id: user.id,
+            account_id: (account as Account).id,
+            amount: Number(balanceValue.toFixed(2)),
+            description: 'Initial balance',
+            date: new Date().toISOString(),
+            type: balanceValue >= 0 ? 'income' : 'expense',
+            category_id: otherIncomeCategory?.id || 'initial_balance',
+            is_recurring: false,
+          });
+        }
 
         return { ok: true };
       } catch (err: any) {
