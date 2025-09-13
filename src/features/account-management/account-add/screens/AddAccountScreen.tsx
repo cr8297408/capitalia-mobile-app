@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
@@ -21,6 +21,12 @@ export const AddAccountScreen: React.FC<AddAccountScreenProps> = ({ navigation }
     const result = await saveAccount(data);
     if (result.ok) {
       navigation.goBack();
+    }
+    else if (result.code === 'limit_reached') {
+      Alert.alert('Limit Reached', result.message);
+    }
+    else {
+      Alert.alert('Error', result.message);
     }
   }, [saveAccount, navigation]);
 

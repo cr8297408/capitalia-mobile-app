@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { StatsCard } from './StatsCard';
 import { useTheme } from '@react-navigation/native';
-import { useDashboard } from '../hooks/useDashboard';
+import { useStatsDashboard } from '../hooks/useStatsDashboard';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 export const DashboardStats: React.FC = () => {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const {
     totalBalance,
     totalBalanceChange,
@@ -21,7 +23,14 @@ export const DashboardStats: React.FC = () => {
     savingsRateIsPositive,
     isLoading,
     error,
-  } = useDashboard();
+    refresh,
+  } = useStatsDashboard();
+
+  useEffect(() => {
+    if (user?.id) {
+      refresh(user.id);
+    }
+  }, [user?.id, refresh]);
   const windowWidth = Dimensions.get('window').width;
   const cardWidth = (windowWidth - 40) / 2 - 8; // Accounting for margins and padding
 

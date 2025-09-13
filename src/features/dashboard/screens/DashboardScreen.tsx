@@ -37,10 +37,6 @@ export const DashboardScreen: React.FC = () => {
   const { isPremium: hasPremium } = usePremiumFeatures();
   
   const {
-    totalBalance,
-    monthlyIncome,
-    monthlyExpenses,
-    savingsRate,
     recentTransactions,
     isLoading,
     error,
@@ -73,13 +69,7 @@ export const DashboardScreen: React.FC = () => {
 
     return (
       <>
-        <DashboardStats 
-          totalBalance={totalBalance}
-          monthlyIncome={monthlyIncome}
-          monthlyExpenses={monthlyExpenses}
-          savingsRate={savingsRate}
-          isLoading={isLoading}
-        />
+        <DashboardStats />
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

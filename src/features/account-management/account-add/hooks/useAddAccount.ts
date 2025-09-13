@@ -9,8 +9,8 @@ type Account = Database['public']['Tables']['accounts']['Row'];
 const transactionService = TransactionService.getInstance();
 
 export type SaveAccountResult =
-  | { ok: true }
-  | { ok: false; code: 'not_authenticated' | 'validation_error' | 'limit_reached' | 'error'; message: string };
+  | { ok: false; code: 'not_authenticated' | 'validation_error' | 'limit_reached' | 'error'; message: string }
+  | { ok: true; code: 'success'; message: string };
 
 export const useAddAccount = () => {
   const { user, limits, isPremium } = useAuth();
@@ -87,7 +87,7 @@ export const useAddAccount = () => {
           });
         }
 
-        return { ok: true };
+        return { ok: true, code: 'success', message: 'Account created successfully' };
       } catch (err: any) {
         console.error('Create account error:', err);
         return { ok: false, code: 'error', message: err?.message || 'Failed to create account' };
