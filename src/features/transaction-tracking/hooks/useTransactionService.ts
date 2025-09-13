@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { transactionService } from '../../../shared/services/transactionService';
-import type { TransactionType } from '@/types/supabase';
+import { TransactionService } from '../../../shared/services/transactionService';
+import type { TransactionType } from '@/shared/types/supabase';
 
 type CreateTransactionParams = {
   user_id: string;
@@ -18,7 +18,7 @@ export const useTransactionService = () => {
   const createTransaction = useCallback(async (transaction: CreateTransactionParams) => {
     console.log("🚀 ~ createTransaction ~ transaction:", transaction)
     try {
-      return await transactionService.createTransaction(transaction as any);
+      return await TransactionService.getInstance().createTransaction(transaction as any);
     } catch (error) {
       console.error('Error creating transaction:', error);
       throw error;

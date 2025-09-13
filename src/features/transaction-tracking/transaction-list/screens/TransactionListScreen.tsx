@@ -20,7 +20,7 @@ import { useAccountName } from '../../../../shared/hooks/useAccountName';
 import { TransactionItem } from '@/features/transaction-tracking/transaction-list/components/TransactionItem';
 import { TransactionFilters } from '@/features/transaction-tracking/transaction-list/components/TransactionFilters';
 import type { RootStackScreenProps } from '@/navigation/types';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/shared/types/supabase';
 
 type Transaction = Database['public']['Tables']['transactions']['Row'];
 

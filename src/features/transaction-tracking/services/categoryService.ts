@@ -1,5 +1,5 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/shared/types/supabase';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 type CategoryInsert = Database['public']['Tables']['categories']['Insert'];

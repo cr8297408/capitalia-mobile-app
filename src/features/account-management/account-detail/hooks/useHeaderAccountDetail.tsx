@@ -1,8 +1,8 @@
-import React from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react-native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { AccountStackParamList } from '@/navigation/types';
+import React, { useEffect } from 'react';
 
 type HeaderAccountDetailProps = {
   navigation: StackNavigationProp<AccountStackParamList, 'AccountDetail'>;
@@ -32,7 +32,7 @@ export const useHeaderAccountDetail = ({
   onEdit,
   onDelete,
 }: HeaderAccountDetailProps) => {
-  React.useEffect(() => {
+  useEffect(() => {
     navigation.setOptions({
       headerTitle: 'Account Details',
       headerTitleAlign: 'left',

@@ -1,5 +1,5 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/shared/types/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type CreateAccountInput = {

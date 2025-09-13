@@ -70,16 +70,4 @@ export const transactionDetailService = {
       account_currency: data.accounts?.currency || 'USD',
     };
   },
-
-  async deleteTransaction(transactionId: string): Promise<void> {
-    const { error } = await supabase
-      .from('transactions')
-      .delete()
-      .eq('id', transactionId);
-
-    if (error) {
-      console.error('Error deleting transaction:', error);
-      throw error;
-    }
-  },
 };

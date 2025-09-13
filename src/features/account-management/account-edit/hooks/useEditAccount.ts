@@ -4,7 +4,7 @@ import { accountService } from '@/features/account-management/services/accountSe
 import { useTransactionService } from '@/features/transaction-tracking/hooks/useTransactionService';
 import { categoryService } from '@/features/transaction-tracking/services/categoryService';
 import { supabase } from '@/infrastructure/supabase/client';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/shared/types/supabase';
 import type { EditAccountFormData, EditAccountResult, DeleteAccountResult, Account } from '../types/account.types';
 
 export const useEditAccount = (accountId: string) => {

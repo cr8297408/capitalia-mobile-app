@@ -1,97 +1,42 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { Database, TransactionType } from '@/types/supabase';
+import type { GetTransactionsParams, QueryParams, Transaction, TransactionInsert, TransactionWithCategory, UpdateTransaction } from '@/shared/types/transaction';
 
-type Transaction = Database['public']['Tables']['transactions']['Row'];
-type InsertTransaction = Database['public']['Tables']['transactions']['Insert'];
-type UpdateTransaction = Database['public']['Tables']['transactions']['Update'];
+export class TransactionService {
+  private static instance: TransactionService;
 
-export type { Transaction, TransactionType };
+  private constructor() {}
 
-// Define the transaction type with required fields
-type TransactionInsert = Omit<InsertTransaction, 'id' | 'created_at' | 'updated_at'> & {
-  user_id: string;
-  account_id: string;
-  amount: number;
-  type: TransactionType;
-  description: string;
-  category_id: string;
-  date: string;
-  is_recurring: boolean;
-};
-
-type TransactionWithCategory = Transaction & {
-  categories: { name: string } | null;
-  category_name?: string | null;
-};
-
-type GetTransactionsParams = {
-  accountId?: string;
-  categoryId?: string;
-  limit?: number;
-  offset?: number;
-  fromDate?: string;
-  toDate?: string;
-  isActiveAccount?: boolean;
-};
-
-
-export const transactionService = {
-  async getTransactions({
-    accountId,
-    categoryId,
-    limit = 20,
-    offset = 0,
-    fromDate,
-    toDate,
-    isActiveAccount = true,
-  }: GetTransactionsParams = {}): Promise<{ data: TransactionWithCategory[]; count: number }> {
-    let accountFilterIds: string[] = [];
-
-    // Si el usuario pide cuentas activas, primero traemos sus IDs
-    if (!accountId && isActiveAccount) {
-      const { data: activeAccounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('id')
-        .eq('is_active', true);
-
-      if (accountsError) {
-        console.error('Error fetching active accounts:', accountsError);
-        throw accountsError;
-      }
-
-      accountFilterIds = (activeAccounts || []).map((acc: any) => acc.id);
+  public static getInstance(): TransactionService {
+    if (!TransactionService.instance) {
+      TransactionService.instance = new TransactionService();
     }
+    return TransactionService.instance;
+  }
 
-    // Construimos la query principal
-    let query = supabase
-      .from('transactions')
-      .select(`
-          *,
-          categories:category_id (name),
-          accounts:account_id (id, name, is_active)
-        `, { count: 'exact' })
-      .order('date', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    // Filtro por cuenta específica
-    if (accountId) {
-      query = query.eq('account_id', accountId);
-    } else if (isActiveAccount) {
-      query = query.in('account_id', accountFilterIds);
-    }
-
-    // Filtro por categoría
-    if (categoryId) {
-      query = query.eq('category_id', categoryId);
-    }
-
-    // Rango de fechas
-    if (fromDate) {
-      query = query.gte('date', fromDate);
-    }
-    if (toDate) {
-      query = query.lte('date', toDate);
-    }
+  public async getTransactions(
+    params: GetTransactionsParams = {}
+  ): Promise<{ data: TransactionWithCategory[]; count: number }> {
+    const { 
+      accountId, 
+      categoryId, 
+      limit = 20, 
+      offset = 0, 
+      fromDate, 
+      toDate, 
+      isActiveAccount = true 
+    } = params;
+    
+    const accountFilterIds = await this.getActiveAccountIds(accountId, isActiveAccount);
+    const query = this.buildTransactionsQuery({
+      accountId,
+      categoryId,
+      limit,
+      offset,
+      fromDate,
+      toDate,
+      isActiveAccount,
+      accountFilterIds,
+    });
 
     const { data, error, count } = await query;
 
@@ -100,20 +45,13 @@ export const transactionService = {
       throw error;
     }
 
-    // Aplanamos la categoría
-    const transactionsWithCategory = (data || []).map((transaction: any) => ({
-      ...transaction,
-      category_name: transaction.categories?.name || null,
-      categories: undefined, // quitamos el objeto nested
-    })) as unknown as TransactionWithCategory[];
-
     return {
-      data: transactionsWithCategory,
+      data: this.formatTransactionsWithCategory(data || []),
       count: count || 0,
     };
-  },
+  }
 
-  async getRecentTransactionsByAccount(accountId: string, limit = 5): Promise<Transaction[]> {
+  public async getRecentTransactionsByAccount(accountId: string, limit = 5): Promise<Transaction[]> {
     const { data, error } = await supabase
       .from('transactions')
       .select('*')
@@ -123,9 +61,9 @@ export const transactionService = {
 
     if (error) throw error;
     return data || [];
-  },
+  }
 
-  async getTransactionById(transactionId: string): Promise<Transaction | null> {
+  public async getTransactionById(transactionId: string): Promise<Transaction | null> {
     const { data, error } = await supabase
       .from('transactions')
       .select('*')
@@ -134,12 +72,12 @@ export const transactionService = {
 
     if (error) return null;
     return data;
-  },
+  }
 
-  async createTransaction(transaction: TransactionInsert): Promise<Transaction> {
+  public async createTransaction(transaction: TransactionInsert): Promise<Transaction> {
     const { data, error } = await supabase
       .from('transactions')
-      .insert(transaction as any) // Type assertion to bypass type checking
+      .insert(transaction as never)
       .select()
       .single();
 
@@ -147,44 +85,112 @@ export const transactionService = {
       console.error('Error creating transaction:', error);
       throw error;
     }
-    if (!data) throw new Error('No data returned from transaction creation');
-    return data;
-  },
 
-  async updateTransaction(
-    transactionId: string,
-    updates: Omit<UpdateTransaction, 'id' | 'created_at' | 'updated_at'>
+    return data as Transaction;
+  }
+
+  public async updateTransaction(
+    transactionId: string, 
+    updates: Partial<Omit<UpdateTransaction, 'id' | 'created_at' | 'updated_at'>>
   ): Promise<Transaction> {
-    const updateData = {
-      ...updates,
-      updated_at: new Date().toISOString(),
-    };
-
     const { data, error } = await supabase
       .from('transactions')
-      .update(updateData as never) // Type assertion to bypass type checking
+      .update(updates as never)
       .eq('id', transactionId)
       .select()
       .single();
 
-    if (error) throw error;
-    if (!data) throw new Error('No data returned from transaction update');
-    return data;
-  },
+    if (error) {
+      console.error('Error updating transaction:', error);
+      throw error;
+    }
 
-  async deleteTransaction(transactionId: string): Promise<boolean> {
+    return data as Transaction;
+  }
+
+  public async deleteTransaction(transactionId: string): Promise<boolean> {
     const { error } = await supabase
       .from('transactions')
       .delete()
       .eq('id', transactionId);
 
-    if (error) throw error;
-    return true;
-  },
+    if (error) {
+      console.error('Error deleting transaction:', error);
+      throw error;
+    }
 
-  // Helper function to format transaction amount with currency
-  formatTransactionAmount(transaction: { amount: number; type: TransactionType }, currency: string): string {
-    const sign = transaction.type === 'expense' ? '-' : '';
-    return `${sign}${currency}${Math.abs(transaction.amount).toFixed(2)}`;
-  },
-};
+    return true;
+  }
+
+  private async getActiveAccountIds(
+    accountId: string | undefined, 
+    isActiveAccount: boolean
+  ): Promise<string[]> {
+    if (accountId || !isActiveAccount) return [];
+
+    const { data: activeAccounts, error } = await supabase
+      .from('accounts')
+      .select('id')
+      .eq('is_active', true);
+
+    if (error) {
+      console.error('Error fetching active accounts:', error);
+      throw error;
+    }
+
+    return activeAccounts?.map((acc: Transaction) => acc.id) || [];
+  }
+
+  private buildTransactionsQuery(params: QueryParams) {
+    const { 
+      accountId, 
+      categoryId, 
+      limit = 20, 
+      offset = 0, 
+      fromDate, 
+      toDate, 
+      accountFilterIds 
+    } = params;
+
+    let query = supabase
+      .from('transactions')
+      .select(
+        `
+          *,
+          categories:category_id (name),
+          accounts:account_id (id, name, is_active)
+        `, 
+        { count: 'exact' }
+      )
+      .order('date', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (accountId) {
+      query = query.eq('account_id', accountId);
+    } else if (accountFilterIds.length > 0) {
+      query = query.in('account_id', accountFilterIds);
+    }
+
+    if (categoryId) {
+      query = query.eq('category_id', categoryId);
+    }
+
+    if (fromDate) {
+      query = query.gte('date', fromDate);
+    }
+    
+    if (toDate) {
+      query = query.lte('date', toDate);
+    }
+
+    return query;
+  }
+
+  private formatTransactionsWithCategory(transactions: any[]): TransactionWithCategory[] {
+    return transactions.map(transaction => ({
+      ...transaction,
+      category_name: transaction.categories?.name || null,
+      categories: undefined,
+    })) as unknown as TransactionWithCategory[];
+  }
+}

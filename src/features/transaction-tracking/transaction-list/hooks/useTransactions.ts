@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { transactionService } from '@/shared/services/transactionService';
-import type { Transaction } from '@/shared/services/transactionService';
+import { TransactionService } from '@/shared/services/transactionService';
+import type { Transaction } from '@/shared/types/transaction';
 
 export const useTransactions = (accountId: string) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -11,7 +11,7 @@ export const useTransactions = (accountId: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await transactionService.getRecentTransactionsByAccount(accountId);
+      const data = await TransactionService.getInstance().getRecentTransactionsByAccount(accountId);
       setTransactions(data);
     } catch (err) {
       console.error('Error fetching transactions:', err);

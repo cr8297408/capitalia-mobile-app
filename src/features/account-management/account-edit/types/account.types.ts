@@ -1,4 +1,4 @@
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/shared/types/supabase';
 
 export type AccountType = 'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan';
 
