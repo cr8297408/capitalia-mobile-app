@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { transactionService } from '@/features/transaction-tracking/services/transactionService';
-import type { Transaction } from '@/features/transaction-tracking/services/transactionService';
+import { transactionService } from '@/shared/services/transactionService';
+import type { Transaction } from '@/shared/services/transactionService';
 
 export const useTransactions = (accountId: string) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);

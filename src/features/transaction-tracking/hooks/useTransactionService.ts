@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { transactionService } from '../services/transactionService';
+import { transactionService } from '../../../shared/services/transactionService';
 import type { TransactionType } from '@/types/supabase';
 
 type CreateTransactionParams = {

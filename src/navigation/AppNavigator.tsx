@@ -8,9 +8,9 @@ import { AuthNavigator } from './AuthNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
 
 // Modal screens
-import { AddTransactionScreen } from '@/features/transaction-tracking/screens/AddTransactionScreen';
-import { EditTransactionScreen } from '@/features/transaction-tracking/screens/EditTransactionScreen';
-import { TransactionDetailScreen } from '@/features/transaction-tracking/screens/TransactionDetailScreen';
+import { AddTransactionScreen } from '@/features/transaction-tracking/transaction-add/screens/AddTransactionScreen';
+import { EditTransactionScreen } from '@/features/transaction-tracking/transaction-edit/screens/EditTransactionScreen';
+import { TransactionDetailScreen } from '@/features/transaction-tracking/transaction-detail/screens/TransactionDetailScreen';
 import { AddAccountScreen } from '@/features/account-management/account-add/screens/AddAccountScreen';
 import { EditAccountScreen } from '@/features/account-management/account-edit/screens/EditAccountScreen';
 import { AddBudgetScreen } from '@/features/budget-management/screens/AddBudgetScreen';

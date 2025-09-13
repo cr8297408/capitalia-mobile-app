@@ -16,9 +16,9 @@ import { Plus } from 'lucide-react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import { useTransactionList } from '@/shared/hooks/useTransactionList';
-import { useAccountName } from '../hooks/useAccountName';
-import { TransactionItem } from '@/features/transaction-tracking/components/TransactionItem';
-import { TransactionFilters } from '@/features/transaction-tracking/components/TransactionFilters';
+import { useAccountName } from '../../../../shared/hooks/useAccountName';
+import { TransactionItem } from '@/features/transaction-tracking/transaction-list/components/TransactionItem';
+import { TransactionFilters } from '@/features/transaction-tracking/transaction-list/components/TransactionFilters';
 import type { RootStackScreenProps } from '@/navigation/types';
 import type { Database } from '@/types/supabase';
 

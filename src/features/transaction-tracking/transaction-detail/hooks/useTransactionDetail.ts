@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { transactionDetailService, TransactionDetail } from '../services/transactionDetailService';
+import { transactionDetailService, TransactionDetail } from '../../services/transactionDetailService';
 
 export const useTransactionDetail = (transactionId: string) => {
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null);
