@@ -1,89 +1,163 @@
-import { supabase } from "@/infrastructure/supabase/client";
-import { Database } from "@/shared/types/supabase";
+import { supabase } from '@/infrastructure/supabase/client';
+import type { BudgetPeriod } from '../hooks/useAddBudget';
 
+export interface Budget {
+  id: string;
+  user_id: string;
+  name: string;
+  amount: number;
+  spent_amount: number;
+  category_id: string | null;
+  period: BudgetPeriod;
+  start_date: string;
+  end_date: string;
+  alert_threshold: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  category?: {
+    id: string;
+    name: string;
+    color: string;
+  };
+}
 
-type Budget = Database['public']['Tables']['budgets']['Row'];
-type InsertBudget = Database['public']['Tables']['budgets']['Insert'];
+export interface CreateBudgetData {
+  name: string;
+  amount: number;
+  category_id?: string;
+  period: BudgetPeriod;
+  start_date: string;
+  end_date: string;
+  alert_threshold?: number;
+}
 
-export const budgetService = {
-  async createBudget(budgetData: Omit<InsertBudget, 'user_id' | 'id' | 'created_at' | 'updated_at' | 'spent_amount' | 'is_active'>, userId: string) {
+export interface UpdateBudgetData extends Partial<CreateBudgetData> {
+  is_active?: boolean;
+}
+
+export class BudgetService {
+  static async getBudgets(): Promise<Budget[]> {
     const { data, error } = await supabase
       .from('budgets')
-      .insert([
-        {
-          ...budgetData,
-          user_id: userId,
-          spent_amount: 0,
-          is_active: true,
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  },
-
-  async updateBudget(id: string, updates: Partial<Budget>, userId: string) {
-    const { data, error } = await supabase
-      .from('budgets')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  },
-
-  async deleteBudget(id: string, userId: string) {
-    const { error } = await supabase
-      .from('budgets')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-  },
-
-  async getBudgets(userId: string) {
-    const { data, error } = await supabase
-      .from('budgets')
-      .select('*')
-      .eq('user_id', userId)
+      .select(`
+        *,
+        category:categories(id, name, color)
+      `)
+      .eq('is_active', true)
       .order('created_at', { ascending: false });
 
     if (error) {
-      throw new Error(error.message);
+      console.error('Error fetching budgets:', error);
+      throw new Error('Failed to fetch budgets');
     }
 
-    return data;
-  },
+    return data || [];
+  }
 
-  async getBudgetById(id: string, userId: string) {
+  static async getBudgetById(id: string): Promise<Budget | null> {
     const { data, error } = await supabase
       .from('budgets')
-      .select('*')
+      .select(`
+        *,
+        category:categories(id, name, color)
+      `)
       .eq('id', id)
-      .eq('user_id', userId)
       .single();
 
     if (error) {
-      throw new Error(error.message);
+      if (error.code === 'PGRST116') {
+        return null; // Budget not found
+      }
+      console.error('Error fetching budget:', error);
+      throw new Error('Failed to fetch budget');
     }
 
     return data;
-  },
-};
+  }
+
+  static async createBudget(budgetData: CreateBudgetData): Promise<Budget> {
+    const { data, error } = await supabase
+      .from('budgets')
+      .insert([budgetData])
+      .select(`
+        *,
+        category:categories(id, name, color)
+      `)
+      .single();
+
+    if (error) {
+      console.error('Error creating budget:', error);
+      throw new Error('Failed to create budget');
+    }
+
+    return data;
+  }
+
+  static async updateBudget(id: string, updates: UpdateBudgetData): Promise<Budget> {
+    const { data, error } = await supabase
+      .from('budgets')
+      .update(updates)
+      .eq('id', id)
+      .select(`
+        *,
+        category:categories(id, name, color)
+      `)
+      .single();
+
+    if (error) {
+      console.error('Error updating budget:', error);
+      throw new Error('Failed to update budget');
+    }
+
+    return data;
+  }
+
+  static async deleteBudget(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('budgets')
+      .update({ is_active: false })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting budget:', error);
+      throw new Error('Failed to delete budget');
+    }
+  }
+
+  static async getBudgetProgress(id: string): Promise<{
+    spent: number;
+    remaining: number;
+    percentage: number;
+  }> {
+    const budget = await this.getBudgetById(id);
+    if (!budget) {
+      throw new Error('Budget not found');
+    }
+
+    const spent = budget.spent_amount;
+    const remaining = Math.max(0, budget.amount - spent);
+    const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+
+    return {
+      spent,
+      remaining,
+      percentage: Math.min(100, percentage),
+    };
+  }
+
+  static async updateSpentAmount(id: string, spentAmount: number): Promise<void> {
+    const { error } = await supabase
+      .from('budgets')
+      .update({
+        spent_amount: spentAmount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating spent amount:', error);
+      throw new Error('Failed to update spent amount');
+    }
+  }
+}
