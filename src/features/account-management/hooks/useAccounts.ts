@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { accountService } from '@/features/account-management/services/accountService';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { accountService } from '@/shared/services/accountService';
 
 export type Account = {
   id: string;

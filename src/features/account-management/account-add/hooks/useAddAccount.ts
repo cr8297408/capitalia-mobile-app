@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react';
-import { accountService } from '@/features/account-management/services/accountService';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { TransactionService } from '@/shared/services/transactionService';
 import { categoryService } from '@/features/transaction-tracking/services/categoryService';
 import type { Database } from '@/shared/types/supabase';
-import { v4 as uuidv4 } from 'uuid';
+import { accountService } from '@/shared/services/accountService';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 const transactionService = TransactionService.getInstance();

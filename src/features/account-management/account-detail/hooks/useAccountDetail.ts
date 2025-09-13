@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useFocusEffect } from '@react-navigation/native';
-import { accountService } from '@/features/account-management/services/accountService';
+import { accountService } from '@/shared/services/accountService';
 
 type Account = {
   id: string;
