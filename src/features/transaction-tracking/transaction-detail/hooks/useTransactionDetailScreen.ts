@@ -32,10 +32,9 @@ type TransactionDetailScreenRouteProp = {
   path?: string;
 };
 
-export const useTransactionDetailScreen = () => {
+export const useTransactionDetailScreen = (transactionId: string) => {
   const navigation = useNavigation<any>();
   const route = useRoute<TransactionDetailScreenRouteProp>();
-  const { transactionId } = route.params;
   const { transaction, isLoading, deleteTransaction } = useTransactionDetail(transactionId);
   
   // Mock data - replace with actual data from your API
@@ -98,7 +97,7 @@ export const useTransactionDetailScreen = () => {
   };
 
   return {
-    transaction: transaction || mockTransaction,
+    transaction: (transaction || mockTransaction )as TransactionDetail,
     isLoading,
     handleEdit,
     handleDelete,

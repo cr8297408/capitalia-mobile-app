@@ -2,6 +2,7 @@
     "conventionalCommits.scopes": [
         "features",
         "components",
-        "navigation"
+        "navigation",
+        "build"
     ]
 }

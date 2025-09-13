@@ -2,7 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import { TransactionListScreen } from '@/features/transaction-tracking/transaction-list/screens/TransactionListScreen';
-import { TransactionDetailScreen } from '@/features/transaction-tracking/screens/TransactionDetailScreen';
+import { TransactionDetailScreen } from '@/features/transaction-tracking/transaction-detail/screens/TransactionDetailScreen';
 
 import type { TransactionStackParamList } from '../types';
 

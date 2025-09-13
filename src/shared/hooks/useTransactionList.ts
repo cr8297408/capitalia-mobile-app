@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { transactionListService } from '../../features/transaction-tracking/services/transactionListService';
-import type { Transaction } from '../services/transactionService';
+import { TransactionService } from '../services/transactionService';
+import { Transaction } from '../types/transaction';
 
 type UseTransactionListProps = {
   accountId?: string;
@@ -34,7 +34,7 @@ export const useTransactionList = ({
           setIsLoading(true);
         }
 
-        const { data, count } = await transactionListService.getTransactions({
+        const { data, count } = await TransactionService.getInstance().getTransactions({
           accountId,
           categoryId,
           fromDate,
@@ -71,7 +71,7 @@ export const useTransactionList = ({
   const handleDeleteTransaction = useCallback(
     async (transactionId: string) => {
       try {
-        await transactionListService.deleteTransaction(transactionId);
+        await TransactionService.getInstance().deleteTransaction(transactionId);
         setTransactions(prev => prev.filter(tx => tx.id !== transactionId));
         setTotalCount(prev => prev - 1);
       } catch (err) {
