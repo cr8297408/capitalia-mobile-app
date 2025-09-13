@@ -16,10 +16,10 @@ module.exports = function (api) {
             '.ios.ts', '.android.ts', '.ts', '.tsx',
             '.ios.tsx', '.android.tsx',
             '.jsx', '.js', '.json'
-          ],
-        },
+          ]
+        }
       ],
-      'react-native-reanimated/plugin',
-    ],
+      'react-native-reanimated/plugin' // ✅ only once, last in the array
+    ]
   };
 };

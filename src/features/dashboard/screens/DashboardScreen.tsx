@@ -30,7 +30,7 @@ type RootStackParamList = {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const DashboardScreen: React.FC = () => {
+export const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { user, isPremium } = useAuth();
   const { isPremium: hasPremium } = usePremiumFeatures();
@@ -297,5 +297,3 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
 });
-
-export default DashboardScreen;
