@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useBudgets } from '../hooks/useBudgets';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
@@ -96,7 +96,14 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onPress }) => {
 export const BudgetListScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<BudgetStackParamList>>();
   const { isPremium, limits } = useAuth();
-  const { budgets, loading, error, deleteBudget } = useBudgets();
+  const { budgets, loading, error, deleteBudget, refresh } = useBudgets();
+
+  // Refresh budgets when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   const handleAddBudget = () => {
     navigation.navigate('AddBudget');
