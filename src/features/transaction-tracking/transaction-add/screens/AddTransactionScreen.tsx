@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Save, Calendar, Tag, DollarSign, Hash, FileText, Repeat, ArrowRight, ChevronDown } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -437,27 +437,64 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
               {showTransferAccountPicker && (
                 <View style={styles.pickerContainer}>
                   <Text style={styles.pickerTitle}>Select Destination Account</Text>
+                  {selectedAccount && (
+                    <Text style={styles.pickerSubtitle}>
+                      From: {selectedAccount.name} ({selectedAccount.currency || 'USD'})
+                    </Text>
+                  )}
                   <ScrollView style={styles.pickerScrollView}>
-                    {accounts.filter((acc: Account) => acc.id !== accountId).map((account: Account) => (
-                      <TouchableOpacity
-                        key={account.id}
-                        style={styles.pickerItem}
-                        onPress={() => {
-                          setTransferToAccountId(account.id);
-                          setShowTransferAccountPicker(false);
-                        }}
-                      >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                          <Text style={styles.pickerItemText}>{account.name}</Text>
-                          <Text style={[styles.pickerItemText, { color: '#666' }]}>
-                            {new Intl.NumberFormat(undefined, {
-                              style: 'currency',
-                              currency: account.currency || 'USD',
-                            }).format(account.balance)}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
+                    {accounts.filter((acc: Account) => acc.id !== accountId).map((account: Account) => {
+                      const currencyMismatch = selectedAccount && 
+                        (selectedAccount.currency || 'USD') !== (account.currency || 'USD');
+                      
+                      return (
+                        <TouchableOpacity
+                          key={account.id}
+                          style={[
+                            styles.pickerItem,
+                            currencyMismatch && styles.pickerItemDisabled
+                          ]}
+                          onPress={() => {
+                            if (currencyMismatch) {
+                              Alert.alert(
+                                'Currency Mismatch',
+                                `Cannot transfer between accounts with different currencies.\n\nSource: ${selectedAccount?.currency || 'USD'}\nDestination: ${account.currency || 'USD'}`,
+                                [{ text: 'OK' }]
+                              );
+                              return;
+                            }
+                            setTransferToAccountId(account.id);
+                            setShowTransferAccountPicker(false);
+                          }}
+                        >
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={[
+                                styles.pickerItemText,
+                                currencyMismatch && styles.pickerItemTextDisabled
+                              ]}>
+                                {account.name}
+                              </Text>
+                              {currencyMismatch && (
+                                <Text style={styles.currencyMismatchText}>
+                                  Currency mismatch ({account.currency || 'USD'})
+                                </Text>
+                              )}
+                            </View>
+                            <Text style={[
+                              styles.pickerItemText, 
+                              { color: '#666' },
+                              currencyMismatch && styles.pickerItemTextDisabled
+                            ]}>
+                              {new Intl.NumberFormat(undefined, {
+                                style: 'currency',
+                                currency: account.currency || 'USD',
+                              }).format(account.balance)}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </ScrollView>
                   <TouchableOpacity 
                     style={styles.pickerCancelButton}

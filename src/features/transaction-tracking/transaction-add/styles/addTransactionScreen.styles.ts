@@ -320,6 +320,26 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
   },
+  // Currency validation styles
+  pickerSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  pickerItemDisabled: {
+    opacity: 0.6,
+    backgroundColor: '#F9FAFB',
+  },
+  pickerItemTextDisabled: {
+    color: '#9CA3AF',
+  },
+  currencyMismatchText: {
+    fontSize: 12,
+    color: '#EF4444',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
 });
 
 export default styles;

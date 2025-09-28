@@ -80,6 +80,23 @@ export const useTransactionForm = () => {
       return;
     }
     
+    // Validate currency compatibility for transfers
+    if (type === 'transfer' && transferToAccountId) {
+      const sourceAccount = accounts.find(acc => acc.id === accountId);
+      const destinationAccount = accounts.find(acc => acc.id === transferToAccountId);
+      
+      if (sourceAccount && destinationAccount) {
+        if (sourceAccount.currency !== destinationAccount.currency) {
+          Alert.alert(
+            'Currency Mismatch',
+            `Cannot transfer between accounts with different currencies.\n\nSource: ${sourceAccount.name} (${sourceAccount.currency})\nDestination: ${destinationAccount.name} (${destinationAccount.currency})`,
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+      }
+    }
+    
     if (isRecurring && !recurringFrequency) {
       Alert.alert('Error', 'Please select a recurring frequency');
       return;
