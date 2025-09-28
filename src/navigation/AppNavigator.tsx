@@ -15,8 +15,8 @@ import { AddAccountScreen } from '@/features/account-management/account-add/scre
 import { EditAccountScreen } from '@/features/account-management/account-edit/screens/EditAccountScreen';
 import { AddBudgetScreen } from '@/features/budget-management/budget-add/screens';
 import { EditBudgetScreen } from '@/features/budget-management/budget-edit/screens';
-import { AddGoalScreen } from '@/features/goal-tracking/screens/AddGoalScreen';
-import { EditGoalScreen } from '@/features/goal-tracking/screens/EditGoalScreen';
+import { AddGoalScreen } from '@/features/goal-management/goal-add/screens/AddGoalScreen';
+import { EditGoalScreen } from '@/features/goal-management/goal-edit/screens/EditGoalScreen';
 import { AddGoalContributionScreen } from '@/features/goal-management/goal-contribution-add';
 
 // Subscription screens
