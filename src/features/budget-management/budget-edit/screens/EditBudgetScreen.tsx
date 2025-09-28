@@ -16,7 +16,7 @@ import { useEditBudget } from '../hooks/useEditBudget';
 import { useCategories } from '@/shared/hooks/useCategories';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
-import type { BudgetPeriod } from '../hooks/useAddBudget';
+import type { BudgetPeriod } from '../components';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 

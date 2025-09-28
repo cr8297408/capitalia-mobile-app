@@ -1,8 +1,8 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { BudgetListScreen } from '@/features/budget-management/screens/BudgetListScreen';
-import { BudgetDetailScreen } from '@/features/budget-management/screens/BudgetDetailScreen';
+import { BudgetListScreen } from '@/features/budget-management/budget-list/screens';
+import { BudgetDetailScreen } from '@/features/budget-management/budget-detail/screens';
 
 import type { BudgetStackParamList } from '../types';
 

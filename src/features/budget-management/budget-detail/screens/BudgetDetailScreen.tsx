@@ -11,8 +11,8 @@ import { TrendingUp, TrendingDown, AlertTriangle, Calendar, Tag } from 'lucide-r
 import { ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBudgetDetail } from '../hooks/useBudgetDetail';
-import { useBudgets } from '../hooks/useBudgets';
-import { useHeaderBudgetDetail } from '../hooks/useHeaderBudgetDetail';
+import { useBudgets } from '../../budget-list/hooks/useBudgets';
+import { useHeaderBudgetDetail } from '../../hooks/useHeaderBudgetDetail';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
 

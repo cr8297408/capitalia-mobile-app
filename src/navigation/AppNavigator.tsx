@@ -13,8 +13,8 @@ import { EditTransactionScreen } from '@/features/transaction-tracking/transacti
 import { TransactionDetailScreen } from '@/features/transaction-tracking/transaction-detail/screens/TransactionDetailScreen';
 import { AddAccountScreen } from '@/features/account-management/account-add/screens/AddAccountScreen';
 import { EditAccountScreen } from '@/features/account-management/account-edit/screens/EditAccountScreen';
-import { AddBudgetScreen } from '@/features/budget-management/screens/AddBudgetScreen';
-import { EditBudgetScreen } from '@/features/budget-management/screens/EditBudgetScreen';
+import { AddBudgetScreen } from '@/features/budget-management/budget-add/screens';
+import { EditBudgetScreen } from '@/features/budget-management/budget-edit/screens';
 import { AddGoalScreen } from '@/features/goal-tracking/screens/AddGoalScreen';
 import { EditGoalScreen } from '@/features/goal-tracking/screens/EditGoalScreen';
 

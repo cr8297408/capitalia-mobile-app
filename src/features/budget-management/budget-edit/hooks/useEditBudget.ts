@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BudgetService, type Budget, type UpdateBudgetData } from '../services/budgetService';
-import type { BudgetPeriod } from './useAddBudget';
+import { BudgetService, type Budget, type UpdateBudgetData } from '../../services/budgetService';
+import type { BudgetPeriod } from '../../budget-add/hooks/useAddBudget';
 
 export interface EditBudgetFormData {
   name: string;

@@ -1,5 +1,5 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { BudgetPeriod } from '../hooks/useAddBudget';
+import type { BudgetPeriod } from '../budget-add/hooks/useAddBudget';
 
 export interface Budget {
   id: string;

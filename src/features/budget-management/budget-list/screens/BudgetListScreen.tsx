@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useBudgets } from '../hooks/useBudgets';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
-import type { Budget } from '../services/budgetService';
+import type { Budget } from '../../services/budgetService';
 
 interface BudgetCardProps {
   budget: Budget;

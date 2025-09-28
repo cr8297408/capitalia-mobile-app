@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BudgetService, type Budget } from '../services/budgetService';
+import { BudgetService, type Budget } from '../../services/budgetService';
 import { useAuth } from '@/shared/hooks/useAuth';
 
 export interface UseBudgetsReturn {

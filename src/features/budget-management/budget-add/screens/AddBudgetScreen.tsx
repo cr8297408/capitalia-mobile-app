@@ -6,9 +6,9 @@ import { AlertCircle } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import type { RootStackScreenProps } from '@/navigation/types';
 import { useAddBudget } from '../hooks/useAddBudget';
-import type { BudgetFormData } from '../components/BudgetForm';
+import type { BudgetFormData } from '../components';
 import { useCategories } from '@/shared/hooks/useCategories';
-import { useBudgetHeader } from '../hooks/useBudgetHeader';
+import { useBudgetHeader } from '../../hooks/useBudgetHeader';
 import { BudgetForm } from '../components';
 
 type AddBudgetScreenProps = RootStackScreenProps<'AddBudget'>;

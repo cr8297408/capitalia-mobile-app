@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { BudgetService, CreateBudgetData } from '../services/budgetService';
+import { BudgetService, CreateBudgetData } from '../../services/budgetService';
 import { budgetService } from '@/shared/services/budgetService';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
