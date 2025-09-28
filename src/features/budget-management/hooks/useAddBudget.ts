@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { budgetService } from '../services/budgetService';
-import { router } from 'expo-router';
+import { BudgetService, CreateBudgetData } from '../services/budgetService';
 
-export type BudgetPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type BudgetPeriod = 'monthly' | 'weekly' | 'yearly' | 'custom';
 
 export interface BudgetFormData {
   name: string;
@@ -47,17 +45,17 @@ export const useAddBudget = () => {
       }
 
       // Convert to database format
-      const budgetData = {
+      const budgetData: CreateBudgetData = {
         name: formData.name,
         amount: amount,
-        category_id: formData.categoryId || null,
+        category_id: formData.categoryId,
         period: formData.period,
         start_date: formData.startDate.toISOString(),
         end_date: formData.endDate.toISOString(),
         alert_threshold: alertThreshold / 100, // Convert percentage to decimal
       };
 
-      const result = await budgetService.createBudget(budgetData, user.id);
+      const result = await BudgetService.createBudget(budgetData);
       return { success: true, data: result };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create budget';
