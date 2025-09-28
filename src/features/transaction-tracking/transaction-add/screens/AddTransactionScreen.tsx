@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import type { RootStackScreenProps } from '@/navigation/types';
 
 import { useTransactionForm } from '../hooks/useTransactionForm';
+import { useCategories } from '@/shared/hooks/useCategories';
 import { styles } from '../styles/addTransactionScreen.styles';
 
 type Account = {
@@ -64,6 +65,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showAccountPicker, setShowAccountPicker] = useState(false);
   const { accounts, isLoadingAccounts } = useTransactionForm();
+  const { categories = [], loading: isLoadingCategories } = useCategories();
   const [showTransferAccountPicker, setShowTransferAccountPicker] = useState(false);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
   
@@ -104,7 +106,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
   } = useTransactionForm();
 
   const selectedAccount = accounts.find((a: Account) => a.id === accountId);
-  const selectedCategory = CATEGORIES.find(c => c.id === categoryId);
+  const selectedCategory = categories.find(c => c.id === categoryId);
   const selectedTransferAccount = accounts.find((a: Account) => a.id === transferToAccountId);
   const selectedFrequency = FREQUENCIES.find(f => f.value === recurringFrequency);
 
@@ -284,21 +286,25 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
               {showCategoryPicker && (
                 <View style={styles.pickerModal}>
                   <Text style={styles.pickerTitle}>Select Category</Text>
-                  {CATEGORIES.map(category => (
-                    <TouchableOpacity
-                      key={category.id}
-                      style={styles.pickerItem}
-                      onPress={() => {
-                        setCategoryId(category.id);
-                        setShowCategoryPicker(false);
-                      }}
-                    >
-                      <Text>{category.name}</Text>
-                      {categoryId === category.id && (
-                        <View style={styles.checkmark} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
+                  {isLoadingCategories ? (
+                    <Text style={styles.placeholderText}>Loading categories...</Text>
+                  ) : (
+                    categories.map(category => (
+                      <TouchableOpacity
+                        key={category.id}
+                        style={styles.pickerItem}
+                        onPress={() => {
+                          setCategoryId(category.id);
+                          setShowCategoryPicker(false);
+                        }}
+                      >
+                        <Text>{category.name}</Text>
+                        {categoryId === category.id && (
+                          <View style={styles.checkmark} />
+                        )}
+                      </TouchableOpacity>
+                    ))
+                  )}
                   <TouchableOpacity 
                     style={styles.pickerCancelButton}
                     onPress={() => setShowCategoryPicker(false)}
