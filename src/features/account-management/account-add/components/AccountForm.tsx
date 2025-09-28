@@ -31,7 +31,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ onSubmit, isSubmitting
   const handleSubmit = async () => {
     try {
       await onSubmit(formData);
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Error', 'Failed to save account');
     }
   };

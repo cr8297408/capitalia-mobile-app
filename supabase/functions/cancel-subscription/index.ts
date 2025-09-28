@@ -65,7 +65,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Cancel subscription error:', error)
     
     return new Response(

@@ -534,7 +534,7 @@ serve(async (req) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
@@ -586,7 +586,7 @@ export const usePremiumFeatures = () => {
                    subscription?.status === 'trialing'
   
   const limits = {
-    maxTransactions: isPremium ? null : 100,
+    maxTransactions: isPremium ? null : 10000000,
     maxAccounts: isPremium ? null : 3,
     maxBudgets: isPremium ? null : 5,
     canExportData: isPremium,

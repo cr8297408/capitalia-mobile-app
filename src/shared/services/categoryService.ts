@@ -49,9 +49,31 @@ export const categoryService = {
       }
 
       return data.id;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting adjustment category:', error);
       return null;
+    }
+  },
+
+  async getGoalCategories(): Promise<Category[]> {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .or(`is_system_default.eq.true,user_id.eq.${user?.id}`)
+        .order('name');
+
+      if (error) {
+        throw new Error(`Failed to fetch goal categories: ${error.message}`);
+      }
+
+      return (data || []) as Category[];
+    } catch (error) {
+      console.error('Error fetching goal categories:', error);
+      throw error;
     }
   },
 };

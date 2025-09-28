@@ -56,7 +56,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create customer portal error:', error)
     
     return new Response(

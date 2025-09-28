@@ -35,7 +35,7 @@ export const useBudgetHeader = ({ onSave, isLoading }: UseBudgetHeaderProps) => 
       if (result.error) {
         console.error('Error saving budget:', result.error);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Unexpected error in save handler:', error);
     }
   }, [onSave]);

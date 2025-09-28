@@ -17,6 +17,8 @@ export type RootStackParamList = {
   EditBudget: { budgetId: string };
   AddGoal: undefined;
   EditGoal: { goalId: string };
+  GoalDetail: { goalId: string };
+  AddGoalContribution: { goalId: string };
   // Subscription screens
   SubscriptionPlans: undefined;
   Billing: undefined;
@@ -63,6 +65,8 @@ export type AccountStackParamList = {
 export type GoalStackParamList = {
   GoalList: undefined;
   GoalDetail: { goalId: string };
+  AddGoal: undefined;
+  EditGoal: { goalId: string };
 };
 
 // Screen Props Types
@@ -88,6 +92,16 @@ export type TransactionStackScreenProps<T extends keyof TransactionStackParamLis
 
 export type AccountStackScreenProps<T extends keyof AccountStackParamList> = CompositeScreenProps<
   StackScreenProps<AccountStackParamList, T>,
+  MainTabScreenProps<keyof MainTabParamList>
+>;
+
+export type BudgetStackScreenProps<T extends keyof BudgetStackParamList> = CompositeScreenProps<
+  StackScreenProps<BudgetStackParamList, T>,
+  MainTabScreenProps<keyof MainTabParamList>
+>;
+
+export type GoalStackScreenProps<T extends keyof GoalStackParamList> = CompositeScreenProps<
+  StackScreenProps<GoalStackParamList, T>,
   MainTabScreenProps<keyof MainTabParamList>
 >;
 

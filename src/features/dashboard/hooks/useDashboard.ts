@@ -76,7 +76,7 @@ export const useDashboard = (): DashboardData => {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error refreshing dashboard data:', error);
       setState(prev => ({
         ...prev,

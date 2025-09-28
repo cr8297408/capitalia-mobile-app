@@ -1,10 +1,10 @@
+
+import React from 'react';
 import { Link, Stack, Redirect } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function NotFoundScreen() {
   // Auto-redirect any unknown route to the home screen
-  return <Redirect href="/" />;
-
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />

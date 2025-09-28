@@ -100,7 +100,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create checkout session error:', error)
     
     return new Response(

@@ -31,7 +31,7 @@ export const useStripeCheckout = () => {
         throw new Error('No checkout URL received');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error);
       Alert.alert('Checkout Error', 'Failed to start checkout process. Please try again.');
       throw error;
@@ -63,7 +63,7 @@ export const useStripeCheckout = () => {
         throw new Error('No portal URL received');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Portal error:', error);
       Alert.alert('Portal Error', 'Failed to open billing portal. Please try again.');
       throw error;

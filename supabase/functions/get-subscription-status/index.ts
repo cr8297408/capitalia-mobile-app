@@ -59,7 +59,7 @@ serve(async (req: Request) => {
 
     // Get plan limits
     let limits = {
-      maxTransactions: 100,
+      maxTransactions: 1000000,
       maxAccounts: 3,
       maxBudgets: 5,
       canExportData: false,

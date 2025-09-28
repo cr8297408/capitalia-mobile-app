@@ -79,7 +79,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
 
         setAccounts(accountsData || []);
         setCategories(uniqueCategories);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching filter data:', error);
       } finally {
         setIsLoading(prev => ({

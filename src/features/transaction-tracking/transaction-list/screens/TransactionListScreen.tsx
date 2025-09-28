@@ -21,6 +21,7 @@ import { TransactionItem } from '@/features/transaction-tracking/transaction-lis
 import { TransactionFilters } from '@/features/transaction-tracking/transaction-list/components/TransactionFilters';
 import type { RootStackScreenProps } from '@/navigation/types';
 import type { Database } from '@/shared/types/supabase';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 type Transaction = Database['public']['Tables']['transactions']['Row'];
 
@@ -202,7 +203,7 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
       {!isPremium && (
         <UpgradePrompt 
           feature="transacciones ilimitadas"
-          currentLimit={limits?.maxTransactions?.toString() || '0'}
+          currentLimit={formatCurrency(limits?.maxTransactions?.toString() || '0')}
           description="Registra transacciones ilimitadas y lleva un mejor control de tus finanzas."
         />
       )}

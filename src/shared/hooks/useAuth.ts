@@ -39,7 +39,7 @@ export const useAuth = () => {
           isAuthenticated: !!session,
           isLoading: false,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error in getInitialSession:', error);
         setAuthState(prev => ({ ...prev, isLoading: false }));
       }
@@ -83,7 +83,7 @@ export const useAuth = () => {
       if (error) throw error;
 
       return { data, error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign in error:', error);
       return { data: null, error };
     } finally {
@@ -108,7 +108,7 @@ export const useAuth = () => {
       if (error) throw error;
 
       return { data, error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error);
       return { data: null, error };
     } finally {
@@ -124,7 +124,7 @@ export const useAuth = () => {
       if (error) throw error;
 
       return { error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign out error:', error);
       return { error };
     } finally {
@@ -141,7 +141,7 @@ export const useAuth = () => {
       if (error) throw error;
 
       return { error: null };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Reset password error:', error);
       return { error };
     }

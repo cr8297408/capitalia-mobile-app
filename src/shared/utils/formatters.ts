@@ -62,7 +62,7 @@ export const formatDate = (dateString: string, format: string = 'MMM d, yyyy'): 
     
     // Fallback to ISO string if format not handled
     return date.toISOString().split('T')[0];
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error formatting date:', error);
     return 'Invalid date';
   }
@@ -90,7 +90,7 @@ export const formatTime = (timeString: string): string => {
     
     const minutesStr = minutes < 10 ? '0' + minutes : minutes;
     return `${hours}:${minutesStr} ${ampm}`;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error formatting time:', error);
     return 'Invalid time';
   }

@@ -19,7 +19,7 @@ export const useTransactionService = () => {
     console.log("🚀 ~ createTransaction ~ transaction:", transaction)
     try {
       return await TransactionService.getInstance().createTransaction(transaction as any);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating transaction:', error);
       throw error;
     }

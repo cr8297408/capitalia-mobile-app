@@ -43,7 +43,7 @@ export const transactionDetailService = {
         accounts:account_id (name, currency)
       `)
       .eq('id', transactionId)
-      .single<TransactionWithRelations>();
+      .single();
 
     if (error) {
       console.error('Error fetching transaction:', error);
@@ -70,4 +70,18 @@ export const transactionDetailService = {
       account_currency: data.accounts?.currency || 'USD',
     };
   },
+
+  async deleteTransaction(transactionId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', transactionId);
+
+    if (error) {
+      console.error('Error deleting transaction:', error);
+      return false;
+    }
+
+    return true;
+  }
 };

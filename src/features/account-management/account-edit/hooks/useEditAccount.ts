@@ -34,7 +34,7 @@ export const useEditAccount = (accountId: string) => {
         ok: true, 
         account
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching account:', error);
       return { 
         ok: false, 

@@ -10,9 +10,10 @@ interface PremiumState {
 }
 
 const DEFAULT_LIMITS: SubscriptionLimits = {
-  maxTransactions: 50,  // Reasonable limit for free tier
+  maxTransactions: 10000000,  // Reasonable limit for free tier
   maxAccounts: 3,
   maxBudgets: 5,
+  maxGoals: 3,
   canExportData: false,
   canUseAdvancedAnalytics: false,
   canUseRecurringTransactions: false,
@@ -62,7 +63,7 @@ export const usePremiumFeatures = () => {
         isLoading: false,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in fetchSubscriptionStatus:', error);
       setPremiumState(prev => ({ ...prev, isLoading: false }));
     }

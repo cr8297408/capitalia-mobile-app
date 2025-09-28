@@ -31,7 +31,7 @@ export const BillingScreen: React.FC<BillingScreenProps> = ({ navigation }) => {
     
     try {
       await createCustomerPortalSession(user.id);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error opening billing portal:', error);
     }
   };

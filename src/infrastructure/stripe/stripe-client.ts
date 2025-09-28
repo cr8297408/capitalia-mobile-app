@@ -26,6 +26,7 @@ export interface SubscriptionLimits {
   maxTransactions: number | null;
   maxAccounts: number | null;
   maxBudgets: number | null;
+  maxGoals: number | null;
   canExportData: boolean;
   canUseAdvancedAnalytics: boolean;
   canUseRecurringTransactions: boolean;

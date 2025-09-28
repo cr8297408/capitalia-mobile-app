@@ -105,7 +105,7 @@ export const useTransactionForm = () => {
           );
           return;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error checking transaction limits:', error);
         // Continue with transaction creation if we can't check limits
       }
@@ -152,7 +152,7 @@ export const useTransactionForm = () => {
       Alert.alert('Success', 'Transaction saved successfully', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving transaction:', error);
       Alert.alert('Error', 'Failed to save transaction. Please try again.');
     } finally {
@@ -169,7 +169,7 @@ export const useTransactionForm = () => {
         setIsLoadingAccounts(true);
         const userAccounts: Account[] = await accountService.listAccounts(user.id);
         setAccounts(userAccounts);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading accounts:', error);
         Alert.alert('Error', 'Failed to load accounts');
       } finally {

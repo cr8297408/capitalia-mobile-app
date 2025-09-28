@@ -132,7 +132,7 @@ export const useAccountDetail = ({ accountId, navigation, refreshTransactions }:
                   }
                 ]
               );
-            } catch (error) {
+            } catch (error: any) {
               console.error('Error deleting account:', error);
               Alert.alert(
                 'Error',

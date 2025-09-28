@@ -58,7 +58,7 @@ export const SubscriptionPlansScreen: React.FC<SubscriptionPlansScreenProps> = (
 
       if (error) throw error;
       setPlans(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching plans:', error);
       Alert.alert('Error', 'Failed to load subscription plans');
     } finally {
@@ -82,7 +82,7 @@ export const SubscriptionPlansScreen: React.FC<SubscriptionPlansScreenProps> = (
       setSelectedPlan(plan.id);
       await createCheckoutSession(plan.stripe_price_id, user.id);
       // Checkout will handle navigation on success/cancel
-    } catch (error) {
+    } catch (error: any) {
       console.error('Checkout error:', error);
       Alert.alert('Error', 'Failed to start checkout process');
     } finally {

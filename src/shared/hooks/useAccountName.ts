@@ -20,7 +20,7 @@ export const useAccountName = (accountId?: string) => {
           .from('accounts')
           .select('name')
           .eq('id', accountId)
-          .single<AccountData>();
+          .single();
 
         if (error) {
           console.error('Error fetching account name:', error);
@@ -30,7 +30,7 @@ export const useAccountName = (accountId?: string) => {
         if (data) {
           setAccountName(data.name);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error in useAccountName:', error);
       }
     };
