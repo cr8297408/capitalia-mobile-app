@@ -1,0 +1,1 @@
+export { EditGoalScreen } from './screens/EditGoalScreen';
