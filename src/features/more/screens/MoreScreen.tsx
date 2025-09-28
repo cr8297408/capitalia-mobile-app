@@ -56,18 +56,42 @@ export const MoreScreen: React.FC = () => {
     navigation.navigate('Billing');
   };
 
+  const handleProfile = () => {
+    navigation.navigate('Profile');
+  };
+
+  const handleSettings = () => {
+    navigation.navigate('Settings');
+  };
+
+  const handleExportData = () => {
+    if (isPremium) {
+      navigation.navigate('DataExport');
+    } else {
+      handleUpgrade();
+    }
+  };
+
+  const handlePrivacySecurity = () => {
+    navigation.navigate('PrivacySecurity');
+  };
+
+  const handleHelpSupport = () => {
+    navigation.navigate('HelpSupport');
+  };
+
   const menuItems = [
     {
       icon: User,
       title: 'Profile',
       subtitle: 'Manage your account',
-      onPress: () => Alert.alert('Coming Soon', 'Profile management coming soon'),
+      onPress: handleProfile,
     },
     {
       icon: Settings,
       title: 'Settings',
       subtitle: 'App preferences',
-      onPress: () => Alert.alert('Coming Soon', 'Settings coming soon'),
+      onPress: handleSettings,
     },
     ...(isPremium ? [
       {
@@ -90,26 +114,20 @@ export const MoreScreen: React.FC = () => {
       icon: FileText,
       title: 'Export Data',
       subtitle: isPremium ? 'Download your financial data' : 'Premium feature',
-      onPress: () => {
-        if (isPremium) {
-          Alert.alert('Coming Soon', 'Data export coming soon');
-        } else {
-          handleUpgrade();
-        }
-      },
+      onPress: handleExportData,
       disabled: !isPremium,
     },
     {
       icon: Shield,
       title: 'Privacy & Security',
       subtitle: 'Manage your privacy settings',
-      onPress: () => Alert.alert('Coming Soon', 'Privacy settings coming soon'),
+      onPress: handlePrivacySecurity,
     },
     {
       icon: HelpCircle,
       title: 'Help & Support',
       subtitle: 'Get help and contact support',
-      onPress: () => Alert.alert('Coming Soon', 'Help center coming soon'),
+      onPress: handleHelpSupport,
     },
   ];
 

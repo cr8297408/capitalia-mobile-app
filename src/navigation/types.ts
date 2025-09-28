@@ -23,6 +23,12 @@ export type RootStackParamList = {
   SubscriptionPlans: undefined;
   Billing: undefined;
   SubscriptionSuccess: { sessionId?: string };
+  // More feature screens
+  Profile: undefined;
+  Settings: undefined;
+  PrivacySecurity: undefined;
+  HelpSupport: undefined;
+  DataExport: undefined;
 };
 
 // Auth Stack Navigator Types

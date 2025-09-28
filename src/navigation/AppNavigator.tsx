@@ -24,6 +24,13 @@ import { SubscriptionPlansScreen } from '@/features/subscription-management/scre
 import { BillingScreen } from '@/features/subscription-management/screens/BillingScreen';
 import { SubscriptionSuccessScreen } from '@/features/subscription-management/screens/SubscriptionSuccessScreen';
 
+// More feature screens
+import { ProfileScreen } from '@/features/more/profile/ProfileScreen';
+import { SettingsScreen } from '@/features/more/settings/SettingsScreen';
+import { PrivacySecurityScreen } from '@/features/more/privacy-security/PrivacySecurityScreen';
+import { HelpSupportScreen } from '@/features/more/help-support/HelpSupportScreen';
+import { DataExportScreen } from '@/features/more/data-export/DataExportScreen';
+
 import type { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -110,6 +117,33 @@ export const AppNavigator: React.FC = () => {
               name="SubscriptionSuccess"
               component={SubscriptionSuccessScreen}
               options={{ headerShown: true, title: 'Welcome to Premium!' }}
+            />
+
+            {/* More Feature Modal Screens */}
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="PrivacySecurity"
+              component={PrivacySecurityScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="HelpSupport"
+              component={HelpSupportScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="DataExport"
+              component={DataExportScreen}
+              options={{ headerShown: false }}
             />
           </Stack.Group>
         </>
