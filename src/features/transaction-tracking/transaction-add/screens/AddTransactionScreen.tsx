@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Save, Calendar, Tag, DollarSign, Hash, FileText, Repeat, ArrowRight, ChevronDown } from 'lucide-react-native';
@@ -7,6 +7,7 @@ import type { RootStackScreenProps } from '@/navigation/types';
 
 import { useTransactionForm } from '../hooks/useTransactionForm';
 import { useCategories } from '@/shared/hooks/useCategories';
+import { useBudgets } from '@/shared/hooks/useBudgets';
 import { styles } from '../styles/addTransactionScreen.styles';
 
 type Account = {
@@ -63,9 +64,12 @@ const TransactionTypeButton = ({
 export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showBudgetPicker, setShowBudgetPicker] = useState(false);
   const [showAccountPicker, setShowAccountPicker] = useState(false);
+  const [associateToBudget, setAssociateToBudget] = useState(false);
   const { accounts, isLoadingAccounts } = useTransactionForm();
   const { categories = [], loading: isLoadingCategories } = useCategories();
+  const { budgets = [], loading: isLoadingBudgets, fetchActiveBudgets } = useBudgets();
   const [showTransferAccountPicker, setShowTransferAccountPicker] = useState(false);
   const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
   
@@ -77,6 +81,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
     type,
     accountId,
     categoryId,
+    budgetId, // ✅ New budget field
     isRecurring,
     recurringFrequency,
     tags,
@@ -91,6 +96,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
     setType,
     setAccountId,
     setCategoryId,
+    setBudgetId, // ✅ New budget setter
     setIsRecurring,
     setRecurringFrequency,
     setTags,
@@ -107,8 +113,16 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
 
   const selectedAccount = accounts.find((a: Account) => a.id === accountId);
   const selectedCategory = categories.find(c => c.id === categoryId);
+  const selectedBudget = budgets.find(b => b.id === budgetId); // ✅ New budget selection
   const selectedTransferAccount = accounts.find((a: Account) => a.id === transferToAccountId);
   const selectedFrequency = FREQUENCIES.find(f => f.value === recurringFrequency);
+
+  // ✅ Auto-assign category when budget is selected
+  useEffect(() => {
+    if (associateToBudget && selectedBudget?.category_id && categoryId !== selectedBudget.category_id) {
+      setCategoryId(selectedBudget.category_id);
+    }
+  }, [associateToBudget, selectedBudget, categoryId, setCategoryId]);
 
   const onChangeDate = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
@@ -272,16 +286,103 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
 
           {type !== 'transfer' && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Category</Text>
-              <TouchableOpacity 
-                style={styles.pickerInput}
-                onPress={() => setShowCategoryPicker(true)}
-              >
-                <Text style={!categoryId ? styles.placeholderText : {}}>
-                  {selectedCategory?.name || 'Select category'}
-                </Text>
-                <ChevronDown size={20} color="#6B7280" />
-              </TouchableOpacity>
+              {/* Budget Association Toggle */}
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity 
+                  style={styles.checkboxButton}
+                  onPress={() => {
+                    const newAssociateToBudget = !associateToBudget;
+                    setAssociateToBudget(newAssociateToBudget);
+                    
+                    if (newAssociateToBudget) {
+                      // When activating budget association, clear category
+                      setCategoryId('');
+                      setBudgetId('');
+                    } else {
+                      // When deactivating budget association, clear budget but keep category
+                      setBudgetId('');
+                    }
+                  }}
+                >
+                  <View style={[styles.checkbox, associateToBudget && styles.checkboxChecked]}>
+                    {associateToBudget && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
+                  <Text style={styles.checkboxLabel}>Associate to budget</Text>
+                </TouchableOpacity>
+              </View>
+
+              {associateToBudget ? (
+                // Budget Selector
+                <>
+                  <Text style={styles.label}>Budget</Text>
+                  <TouchableOpacity 
+                    style={styles.pickerInput}
+                    onPress={() => setShowBudgetPicker(true)}
+                  >
+                    <Text style={!budgetId ? styles.placeholderText : {}}>
+                      {selectedBudget?.name || 'Select budget'}
+                    </Text>
+                    <ChevronDown size={20} color="#6B7280" />
+                  </TouchableOpacity>
+                  
+                  {showBudgetPicker && (
+                    <View style={styles.pickerModal}>
+                      <Text style={styles.pickerTitle}>Select Budget</Text>
+                      {isLoadingBudgets ? (
+                        <Text style={styles.placeholderText}>Loading budgets...</Text>
+                      ) : (
+                        budgets.map(budget => (
+                          <TouchableOpacity
+                            key={budget.id}
+                            style={styles.pickerItem}
+                            onPress={() => {
+                              setBudgetId(budget.id);
+                              // Auto-set category from budget if available
+                              if (budget.category_id) {
+                                setCategoryId(budget.category_id);
+                              }
+                              setShowBudgetPicker(false);
+                            }}
+                          >
+                            <View>
+                              <Text style={styles.budgetName}>{budget.name}</Text>
+                              <Text style={styles.budgetSubtext}>
+                                ${budget.spent_amount.toFixed(2)} / ${budget.amount.toFixed(2)}
+                              </Text>
+                            </View>
+                            {budgetId === budget.id && (
+                              <View style={styles.checkmark} />
+                            )}
+                          </TouchableOpacity>
+                        ))
+                      )}
+                      <TouchableOpacity 
+                        style={styles.pickerCancelButton}
+                        onPress={() => setShowBudgetPicker(false)}
+                      >
+                        <Text style={styles.pickerCancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
+              ) : (
+                // Category Selector (original logic)
+                <>
+                  <Text style={styles.label}>Category</Text>
+                  <TouchableOpacity 
+                    style={styles.pickerInput}
+                    onPress={() => setShowCategoryPicker(true)}
+                  >
+                    <Text style={!categoryId ? styles.placeholderText : {}}>
+                      {selectedCategory?.name || 'Select category'}
+                    </Text>
+                    <ChevronDown size={20} color="#6B7280" />
+                  </TouchableOpacity>
+                </>
+              )}
+              
               
               {showCategoryPicker && (
                 <View style={styles.pickerModal}>

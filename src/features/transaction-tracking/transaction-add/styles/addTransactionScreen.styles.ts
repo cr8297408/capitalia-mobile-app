@@ -282,6 +282,44 @@ export const styles = StyleSheet.create({
       // iOS specific styles
     },
   }),
+  // ✅ New styles for budget association
+  checkboxContainer: {
+    marginBottom: 16,
+  },
+  checkboxButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    borderRadius: 4,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  budgetName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  budgetSubtext: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
 });
 
 export default styles;

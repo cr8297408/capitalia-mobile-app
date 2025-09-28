@@ -34,6 +34,7 @@ export const useTransactionForm = () => {
   const [type, setType] = useState<TransactionType>('expense');
   const [accountId, setAccountId] = useState<string>('');
   const [categoryId, setCategoryId] = useState<string>('');
+  const [budgetId, setBudgetId] = useState<string>(''); // ✅ New budget association
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency | null>(null);
   const [tags, setTags] = useState<string[]>([]);
@@ -53,8 +54,21 @@ export const useTransactionForm = () => {
   };
 
   const handleSave = async () => {
-    if (!description || !amount || !accountId || (type !== 'transfer' && !categoryId)) {
+    // Check basic required fields
+    if (!description || !amount || !accountId) {
       Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    // For non-transfer transactions, require either category or budget
+    if (type !== 'transfer' && !categoryId && !budgetId) {
+      Alert.alert('Error', 'Please select a category or associate with a budget');
+      return;
+    }
+    
+    // If budget is selected, ensure category is also present (should be auto-assigned)
+    if (budgetId && !categoryId) {
+      Alert.alert('Error', 'Budget selection requires a category. Please try selecting the budget again.');
       return;
     }
     
@@ -87,6 +101,7 @@ export const useTransactionForm = () => {
         type,
         account_id: accountId,
         category_id: type !== 'transfer' ? categoryId : null,
+        budget_id: budgetId || null, // ✅ Include budget association
         is_recurring: isRecurring,
         recurring_frequency: isRecurring ? recurringFrequency : null,
         tags: tags.map(tag => tag.trim()).filter(tag => tag.length > 0),
@@ -94,7 +109,12 @@ export const useTransactionForm = () => {
         transfer_to_account_id: type === 'transfer' ? transferToAccountId : null,
         user_id: user?.id || '',
       };
-      console.log("🚀 ~ handleSave ~ transactionData:", transactionData)
+      console.log("🚀 ~ handleSave ~ transactionData:", transactionData);
+      
+      // Additional validation log for budget association
+      if (budgetId && categoryId) {
+        console.log("✅ Budget association active: budget_id =", budgetId, "| category_id =", categoryId);
+      }
       
       // Call the transaction service to save the transaction
       await transactionService.createTransaction(transactionData);
@@ -148,6 +168,7 @@ export const useTransactionForm = () => {
     type,
     accountId,
     categoryId,
+    budgetId, // ✅ New budget field
     isRecurring,
     recurringFrequency,
     tags,
@@ -162,6 +183,7 @@ export const useTransactionForm = () => {
     setType,
     setAccountId,
     setCategoryId,
+    setBudgetId, // ✅ New budget setter
     setIsRecurring,
     setRecurringFrequency,
     setTags,

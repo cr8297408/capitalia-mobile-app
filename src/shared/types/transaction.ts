@@ -7,6 +7,7 @@ export interface Transaction {
   user_id: string;
   account_id: string;
   category_id: string | null;
+  budget_id?: string | null; // ✅ New optional budget association
   category?: Category;
   amount: number;
   description: string;

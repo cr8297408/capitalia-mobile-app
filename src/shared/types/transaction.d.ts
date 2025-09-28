@@ -1,4 +1,5 @@
 import { Database } from "./supabase";
+import { TransactionType } from "./transaction";
 
 export type Transaction = Database['public']['Tables']['transactions']['Row'];
 export type InsertTransaction = Database['public']['Tables']['transactions']['Insert'];
@@ -10,7 +11,8 @@ export type TransactionInsert = Omit<InsertTransaction, 'id' | 'created_at' | 'u
   amount: number;
   type: TransactionType;
   description: string;
-  category_id: string;
+  category_id?: string | null; // ✅ Make optional for budget associations
+  budget_id?: string | null; // ✅ Add budget association
   date: string;
   is_recurring: boolean;
 };
