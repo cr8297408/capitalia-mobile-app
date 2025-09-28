@@ -109,4 +109,18 @@ export const budgetService = {
       throw error;
     }
   },
+
+  async getBudgetsCount(userId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('budgets')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error getting budgets count:', error);
+      throw error;
+    }
+
+    return count || 0;
+  },
 };

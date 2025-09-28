@@ -4,9 +4,12 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import { transactionService, TransactionType, RecurringFrequency } from '../../services/transactionService';
+import { TransactionService } from '@/shared/services/transactionService';
 import { accountService } from '@/shared/services/accountService';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useEffect } from 'react';
+
+const sharedTransactionService = TransactionService.getInstance();
 
 type Account = {
   id: string;
@@ -23,7 +26,7 @@ type AddTransactionScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 export const useTransactionForm = () => {
-  const { user } = useAuth();
+  const { user, isPremium, limits } = useAuth();
   const navigation = useNavigation<AddTransactionScreenNavigationProp>();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
@@ -80,6 +83,32 @@ export const useTransactionForm = () => {
     if (isRecurring && !recurringFrequency) {
       Alert.alert('Error', 'Please select a recurring frequency');
       return;
+    }
+
+    // ✅ Check transaction limits for non-premium users
+    if (!isPremium && limits?.maxTransactions != null) {
+      try {
+        const transactionsCount = await sharedTransactionService.getTransactionsCount(user?.id || '');
+        if (transactionsCount >= limits.maxTransactions) {
+          Alert.alert(
+            'Limit Reached',
+            `You have reached the free tier limit of ${limits.maxTransactions} transactions. Upgrade to add more.`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { 
+                text: 'Upgrade', 
+                onPress: () => {
+                  navigation.navigate('SubscriptionPlans');
+                }
+              }
+            ]
+          );
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking transaction limits:', error);
+        // Continue with transaction creation if we can't check limits
+      }
     }
     
     try {

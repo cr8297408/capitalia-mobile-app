@@ -198,7 +198,7 @@ export const BudgetListScreen: React.FC = () => {
         ListEmptyComponent={renderEmpty}
       />
 
-      {!isPremium && budgets.length >= (limits.maxBudgets || 5) && (
+      {!isPremium && (
         <UpgradePrompt
           feature="unlimited budgets"
           currentLimit={limits.maxBudgets || 'N/A'}

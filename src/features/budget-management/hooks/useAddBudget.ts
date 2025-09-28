@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { BudgetService, CreateBudgetData } from '../services/budgetService';
+import { budgetService } from '@/shared/services/budgetService';
+import { Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { RootStackNavigationProp } from '@/navigation/types';
 
 export type BudgetPeriod = 'monthly' | 'weekly' | 'yearly' | 'custom';
 
@@ -15,7 +19,8 @@ export interface BudgetFormData {
 }
 
 export const useAddBudget = () => {
-  const { user } = useAuth();
+  const { user, isPremium, limits } = useAuth();
+  const navigation = useNavigation<RootStackNavigationProp>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +47,34 @@ export const useAddBudget = () => {
 
       if (isNaN(alertThreshold) || alertThreshold <= 0) {
         throw new Error('Please enter a valid alert threshold');
+      }
+
+      // ✅ Check budget limits for non-premium users
+      if (!isPremium && limits?.maxBudgets != null) {
+        try {
+          const budgetsCount = await budgetService.getBudgetsCount(user.id);
+          if (budgetsCount >= limits.maxBudgets) {
+            const message = `You have reached the free tier limit of ${limits.maxBudgets} budgets. Upgrade to add more.`;
+            setError(message);
+            Alert.alert(
+              'Limit Reached',
+              message,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { 
+                  text: 'Upgrade', 
+                  onPress: () => {
+                    navigation.navigate('SubscriptionPlans');
+                  }
+                }
+              ]
+            );
+            return { success: false, error: message } as const;
+          }
+        } catch (limitError) {
+          console.error('Error checking budget limits:', limitError);
+          // Continue with budget creation if we can't check limits
+        }
       }
 
       // Convert to database format

@@ -181,7 +181,7 @@ export const TransactionListScreen: React.FC<TransactionListScreenProps> = ({ na
         </View>
       ) : (
         <FlatList
-          data={transactions}
+          data={transactions as any}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
         contentContainerStyle={styles.listContent}

@@ -46,7 +46,9 @@ export const usePremiumFeatures = () => {
       const { data, error } = await supabase.functions.invoke('get-subscription-status', {
         body: { userId: user.id }
       });
-
+      console.log("🚀 ~ usePremiumFeatures ~ data:", data)
+      console.log("🚀 ~ usePremiumFeatures ~ error:", error)
+      
       if (error) {
         console.error('Error fetching subscription status:', error);
         setPremiumState(prev => ({ ...prev, isLoading: false }));

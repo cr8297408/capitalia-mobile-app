@@ -62,7 +62,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     if (!validateForm()) return;
 
     setIsLoading(true);
-    const { error } = await signUp(email, password, firstName);
+    const { error }: any = await signUp(email, password, firstName);
     setIsLoading(false);
 
     if (error) {

@@ -1,5 +1,5 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { GetTransactionsParams, QueryParams, Transaction, TransactionInsert, TransactionWithCategory, UpdateTransaction } from '@/shared/types/transaction';
+import type { GetTransactionsParams, QueryParams, Transaction, TransactionInsert, TransactionWithCategory, UpdateTransaction } from '@/shared/types/transaction.d';
 
 export class TransactionService {
   private static instance: TransactionService;
@@ -120,6 +120,20 @@ export class TransactionService {
     }
 
     return true;
+  }
+
+  public async getTransactionsCount(userId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error getting transactions count:', error);
+      throw error;
+    }
+
+    return count || 0;
   }
 
   private async getActiveAccountIds(
