@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { ChevronDown } from 'lucide-react-native';
 import { Picker } from '@react-native-picker/picker';
 import type { EditAccountFormData, AccountType } from '../types/account.types';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 type AccountFormProps = {
   initialData: EditAccountFormData;
@@ -59,14 +60,20 @@ export const AccountForm: React.FC<AccountFormProps> = ({
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Current Balance</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.balance}
-          onChangeText={(value) => handleChange('balance', value)}
-          placeholder="0.00"
-          keyboardType="numeric"
-          editable={!isSubmitting}
-        />
+        <View style={styles.amountContainer}>
+          <Text style={styles.currencySymbol}>$</Text>
+          <TextInput
+            style={[styles.input, styles.amountInput]}
+            value={formatCurrency(formData.balance)}
+            onChangeText={(text) => {
+              const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+              handleChange('balance', parsedValue);
+            }}
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            editable={!isSubmitting}
+          />
+        </View>
       </View>
 
       <View style={styles.inputGroup}>
@@ -213,5 +220,21 @@ const styles = StyleSheet.create({
     color: '#B91C1C',
     fontSize: 16,
     fontWeight: '600',
+  },
+  amountContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  currencySymbol: {
+    position: 'absolute',
+    left: 12,
+    top: '50%',
+    marginTop: -8,
+    fontSize: 16,
+    color: '#6B7280',
+    zIndex: 1,
+  },
+  amountInput: {
+    paddingLeft: 30,
   },
 });

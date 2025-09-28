@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Save, ArrowLeft } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 type EditTransactionScreenProps = RootStackScreenProps<'EditTransaction'>;
 
@@ -71,13 +72,19 @@ export const EditTransactionScreen: React.FC<EditTransactionScreenProps> = ({ na
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Amount</Text>
-          <TextInput
-            style={styles.input}
-            value={amount}
-            onChangeText={setAmount}
-            placeholder="0.00"
-            keyboardType="numeric"
-          />
+          <View style={styles.amountContainer}>
+            <Text style={styles.currencySymbol}>$</Text>
+            <TextInput
+              style={[styles.input, styles.amountInput]}
+              value={formatCurrency(amount)}
+              onChangeText={(text) => {
+                const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+                setAmount(parsedValue);
+              }}
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+            />
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -133,5 +140,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#F9FAFB',
+  },
+  amountContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  currencySymbol: {
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    marginTop: -8,
+    fontSize: 16,
+    color: '#6B7280',
+    zIndex: 1,
+  },
+  amountInput: {
+    paddingLeft: 30,
   },
 });

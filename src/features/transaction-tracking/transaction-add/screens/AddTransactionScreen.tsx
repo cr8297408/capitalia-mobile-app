@@ -9,6 +9,7 @@ import { useTransactionForm } from '../hooks/useTransactionForm';
 import { useCategories } from '@/shared/hooks/useCategories';
 import { useBudgets } from '@/shared/hooks/useBudgets';
 import { styles } from '../styles/addTransactionScreen.styles';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 type Account = {
   id: string;
@@ -182,10 +183,13 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
               <Text style={styles.currencySymbol}>$</Text>
               <TextInput
                 style={[styles.input, styles.amountInput]}
-                value={amount}
-                onChangeText={setAmount}
+                value={formatCurrency(amount)}
+                onChangeText={(text) => {
+                  const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+                  setAmount(parsedValue);
+                }}
                 placeholder="0.00"
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
                 returnKeyType="done"
               />
             </View>

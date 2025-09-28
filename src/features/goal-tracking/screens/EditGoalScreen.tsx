@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Save, Trash2 } from 'lucide-react-native';
 import type { RootStackScreenProps } from '@/navigation/types';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 type EditGoalScreenProps = RootStackScreenProps<'EditGoal'>;
 
@@ -80,15 +81,21 @@ export const EditGoalScreen: React.FC<EditGoalScreenProps> = ({ navigation, rout
           />
         </View>
 
-        <View style={styles.inputGroup}>
+                <View style={styles.inputGroup}>
           <Text style={styles.label}>Target Amount</Text>
-          <TextInput
-            style={styles.input}
-            value={targetAmount}
-            onChangeText={setTargetAmount}
-            placeholder="0.00"
-            keyboardType="numeric"
-          />
+          <View style={styles.amountContainer}>
+            <Text style={styles.currencySymbol}>$</Text>
+            <TextInput
+              style={[styles.input, styles.amountInput]}
+              value={formatCurrency(targetAmount)}
+              onChangeText={(text) => {
+                const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+                setTargetAmount(parsedValue);
+              }}
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+            />
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -144,5 +151,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#F9FAFB',
+  },
+  amountContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  currencySymbol: {
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    marginTop: -8,
+    fontSize: 16,
+    color: '#6B7280',
+    zIndex: 1,
+  },
+  amountInput: {
+    paddingLeft: 30,
   },
 });

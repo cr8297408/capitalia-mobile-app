@@ -15,6 +15,7 @@ import { useBudgets } from '../../budget-list/hooks/useBudgets';
 import { useHeaderBudgetDetail } from '../../hooks/useHeaderBudgetDetail';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
+import { formatCurrencyDisplay } from '@/shared/utils/currencyFormatter';
 
 type BudgetDetailScreenNavigationProp = StackNavigationProp<BudgetStackParamList, 'BudgetDetail'>;
 
@@ -143,18 +144,18 @@ export const BudgetDetailScreen: React.FC = () => {
           <View style={styles.overviewGrid}>
             <View style={styles.overviewItem}>
               <Text style={styles.overviewLabel}>Total Budget</Text>
-              <Text style={styles.overviewValue}>${budget.amount.toFixed(2)}</Text>
+              <Text style={styles.overviewValue}>{formatCurrencyDisplay(budget.amount)}</Text>
             </View>
             <View style={styles.overviewItem}>
               <Text style={styles.overviewLabel}>Spent</Text>
-              <Text style={styles.overviewValue}>${budget.spent_amount.toFixed(2)}</Text>
+              <Text style={styles.overviewValue}>{formatCurrencyDisplay(budget.spent_amount)}</Text>
             </View>
             <View style={styles.overviewItem}>
               <Text style={styles.overviewLabel}>Remaining</Text>
               <Text style={[styles.overviewValue, {
                 color: progress && progress.remaining < 0 ? '#EF4444' : '#10B981'
               }]}>
-                ${progress?.remaining.toFixed(2) || '0.00'}
+                {formatCurrencyDisplay(progress?.remaining || 0)}
               </Text>
             </View>
             <View style={styles.overviewItem}>

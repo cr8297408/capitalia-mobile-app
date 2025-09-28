@@ -19,6 +19,7 @@ import type { BudgetStackParamList } from '@/navigation/types';
 import type { BudgetPeriod } from '../components';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 type EditBudgetScreenNavigationProp = StackNavigationProp<BudgetStackParamList, 'EditBudget'>;
 
@@ -142,8 +143,11 @@ export const EditBudgetScreen: React.FC = () => {
               <Text style={styles.currencySymbol}>$</Text>
               <TextInput
                 style={[styles.input, { paddingLeft: 30 }]}
-                value={formData.amount}
-                onChangeText={(value) => updateField('amount', value.replace(/[^0-9.]/g, ''))}
+                value={formatCurrency(formData.amount)}
+                onChangeText={(text) => {
+                  const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+                  updateField('amount', parsedValue);
+                }}
                 placeholder="0.00"
                 keyboardType="decimal-pad"
                 placeholderTextColor="#9CA3AF"

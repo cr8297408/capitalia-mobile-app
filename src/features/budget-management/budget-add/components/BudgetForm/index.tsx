@@ -12,40 +12,13 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { BudgetFormData as SharedBudgetFormData, BudgetPeriod } from '../../hooks/useAddBudget';
+import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
 
 export type { BudgetPeriod };
 
 export interface BudgetFormData extends Omit<SharedBudgetFormData, 'alertThreshold'> {
   alertThreshold: string; // Keep as string for form input, will be converted to number on submit
 }
-
-// Utility functions for currency formatting
-const formatCurrency = (value: string): string => {
-  // Remove all non-numeric characters except dots
-  const numericValue = value.replace(/[^0-9.]/g, '');
-  
-  // Handle empty string
-  if (!numericValue) return '';
-  
-  // Split by decimal point
-  const parts = numericValue.split('.');
-  const integerPart = parts[0];
-  const decimalPart = parts[1];
-  
-  // Add thousands separators to integer part
-  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  
-  // Return with decimal part if it exists
-  if (decimalPart !== undefined) {
-    return `${formattedInteger}.${decimalPart.slice(0, 2)}`; // Limit to 2 decimal places
-  }
-  
-  return formattedInteger;
-};
-
-const parseCurrencyToNumber = (value: string): string => {
-  return value.replace(/,/g, '');
-};
 
 interface BudgetFormProps {
   formData: BudgetFormData;
