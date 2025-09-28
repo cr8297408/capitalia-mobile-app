@@ -42,7 +42,7 @@ export const AddBudgetScreen: React.FC<AddBudgetScreenProps> = ({ navigation }) 
       return { success: false, error: 'Invalid date range' };
     }
 
-    if (!formData.name || !formData.amount) {
+    if (!formData.name || !formData.amount || !formData.categoryId) {
       Alert.alert('Error', 'Please fill in all required fields');
       return { success: false, error: 'Missing required fields' };
     }

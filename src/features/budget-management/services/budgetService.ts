@@ -26,6 +26,7 @@ export interface CreateBudgetData {
   name: string;
   amount: number;
   category_id?: string;
+  user_id: string;
   period: BudgetPeriod;
   start_date: string;
   end_date: string;

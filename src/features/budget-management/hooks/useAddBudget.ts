@@ -85,6 +85,7 @@ export const useAddBudget = () => {
         period: formData.period,
         start_date: formData.startDate.toISOString(),
         end_date: formData.endDate.toISOString(),
+        user_id: user.id || '', // Ensure user_id is provided
         alert_threshold: alertThreshold / 100, // Convert percentage to decimal
       };
 

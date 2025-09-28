@@ -103,7 +103,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Category (Optional)</Text>
+        <Text style={styles.label}>Category</Text>
         <View style={[styles.pickerContainer, isLoading && styles.disabledInput]}>
           <Tag size={20} color="#6B7280" style={styles.icon} />
           <ChevronDown size={20} color="#6B7280" style={styles.pickerIcon} />
@@ -114,7 +114,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
             enabled={!isLoading}
             dropdownIconColor="#6B7280"
           >
-            <Picker.Item label="Select a category (optional)" value="" enabled={false} />
+            <Picker.Item label="Select a category" value="" enabled={false} />
             {categories.map((category: { id: string; name: string }) => (
               <Picker.Item 
                 key={category.id}

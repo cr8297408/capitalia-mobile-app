@@ -10,7 +10,7 @@ interface PremiumState {
 }
 
 const DEFAULT_LIMITS: SubscriptionLimits = {
-  maxTransactions: 100,
+  maxTransactions: 50,  // Reasonable limit for free tier
   maxAccounts: 3,
   maxBudgets: 5,
   canExportData: false,
