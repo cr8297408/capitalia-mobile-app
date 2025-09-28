@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { TransactionService } from '@/shared/services/transactionService';
-import { categoryService } from '@/features/transaction-tracking/services/categoryService';
+import { categoryService } from '@/shared/services/categoryService';
 import type { Database } from '@/shared/types/supabase';
 import { accountService } from '@/shared/services/accountService';
 

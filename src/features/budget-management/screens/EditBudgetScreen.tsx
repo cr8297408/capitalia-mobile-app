@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Save, Trash2, Calendar, Tag, Clock, AlertTriangle } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useEditBudget } from '../hooks/useEditBudget';
-import { useCategories } from '../../transaction-tracking/hooks/useCategories';
+import { useCategories } from '@/shared/hooks/useCategories';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
 import type { BudgetPeriod } from '../hooks/useAddBudget';

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { accountService } from '@/shared/services/accountService';
 import { useTransactionService } from '@/features/transaction-tracking/hooks/useTransactionService';
-import { categoryService } from '@/features/transaction-tracking/services/categoryService';
+import { categoryService } from '@/shared/services/categoryService';
 import { supabase } from '@/infrastructure/supabase/client';
 import type { Database } from '@/shared/types/supabase';
 import type { EditAccountFormData, EditAccountResult, DeleteAccountResult, Account } from '../types/account.types';

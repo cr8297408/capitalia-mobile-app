@@ -1,13 +1,5 @@
 import { supabase } from '@/infrastructure/supabase/client';
-import type { Database } from '@/shared/types/supabase';
-
-type Category = Database['public']['Tables']['categories']['Row'];
-type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
-type CategoryUpdate = Database['public']['Tables']['categories']['Update'];
-
-type CategoryId = {
-  id: string;
-};
+import type { Category } from '@/shared/types/category';
 
 export const categoryService = {
   async getCategoryByName(name: string): Promise<Category | null> {
@@ -16,13 +8,13 @@ export const categoryService = {
       .select('*')
       .ilike('name', `%${name}%`)
       .limit(1)
-      .single<Category>();
+      .single();
 
     if (error) {
       console.error('Error fetching category:', error);
       return null;
     }
-    return data;
+    return data as Category;
   },
 
   async getAdjustmentCategory(): Promise<string | null> {
@@ -42,7 +34,7 @@ export const categoryService = {
         .eq('is_system_default', true)
         .or('name.ilike.%ajuste%,name.ilike.%balance%')
         .limit(1)
-        .single<CategoryId>();
+        .single();
 
       if (error || !data) {
         console.warn('No adjustment category found, using first available category');
@@ -51,7 +43,7 @@ export const categoryService = {
           .from('categories')
           .select('id')
           .limit(1)
-          .single<CategoryId>();
+          .single();
         
         return firstCategory?.id || null;
       }

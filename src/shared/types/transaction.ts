@@ -1,11 +1,6 @@
-export type TransactionType = 'income' | 'expense' | 'transfer';
+import type { Category } from './category';
 
-export interface Category {
-  id: string;
-  name: string;
-  icon?: string;
-  color?: string;
-}
+export type TransactionType = 'income' | 'expense' | 'transfer';
 
 export interface Transaction {
   id: string;

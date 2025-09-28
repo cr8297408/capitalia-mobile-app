@@ -92,6 +92,7 @@ export const useTransactionForm = () => {
         tags: tags.map(tag => tag.trim()).filter(tag => tag.length > 0),
         notes: notes.trim() || null,
         transfer_to_account_id: type === 'transfer' ? transferToAccountId : null,
+        user_id: user?.id || '',
       };
       console.log("🚀 ~ handleSave ~ transactionData:", transactionData)
       
