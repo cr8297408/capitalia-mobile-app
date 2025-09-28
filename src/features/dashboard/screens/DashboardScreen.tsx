@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,13 @@ import { usePremiumFeatures } from '@/shared/hooks/usePremiumFeatures';
 import { PremiumBadge } from '@/shared/components/ui/PremiumBadge';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 
+import { DashboardHeader } from '../components/DashboardHeader';
 import { DashboardStats } from '../components/DashboardStats';
+import { CategoryExpensesChart } from '../components/CategoryExpensesChart';
+import { DashboardInsights } from '../components/DashboardInsights';
 import { RecentTransactions } from '../components/RecentTransactions';
 import { useDashboard } from '../hooks/useDashboard';
+import { useDashboardInsights, PeriodType } from '../hooks/useDashboardInsights';
 import { dashboardStyles as styles } from './DashboardScreen.styles';
 
 type RootStackParamList = {
@@ -35,6 +39,7 @@ export const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { user, isPremium } = useAuth();
   const { isPremium: hasPremium } = usePremiumFeatures();
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
   
   const {
     recentTransactions,
@@ -42,6 +47,15 @@ export const DashboardScreen: React.FC = () => {
     error,
     refresh,
   } = useDashboard();
+
+  const {
+    categoryExpenses,
+    aiInsights,
+    goalProgress,
+    loading: insightsLoading,
+    refresh: refreshInsights,
+    changePeriod,
+  } = useDashboardInsights();
 
   const handleAddTransaction = useCallback(() => {
     navigation.navigate('AddTransaction' as any);
@@ -51,9 +65,30 @@ export const DashboardScreen: React.FC = () => {
     navigation.navigate('Transactions');
   }, [navigation]);
 
+  const handleViewAllGoals = useCallback(() => {
+    navigation.navigate('Goals' as any);
+  }, [navigation]);
+
+  const handleNotificationsPress = useCallback(() => {
+    // TODO: Navigate to notifications screen
+    console.log('Notifications pressed');
+  }, []);
+
+  const handleSettingsPress = useCallback(() => {
+    navigation.navigate('More' as any);
+  }, [navigation]);
+
   const handleRefresh = useCallback(() => {
     refresh();
-  }, [refresh]);
+    refreshInsights();
+  }, [refresh, refreshInsights]);
+
+  const handlePeriodChange = useCallback((period: PeriodType) => {
+    setSelectedPeriod(period);
+    changePeriod(period);
+  }, [changePeriod]);
+
+  const isLoadingData = isLoading || insightsLoading;
 
   const renderContent = () => {
     if (error) {
@@ -69,13 +104,33 @@ export const DashboardScreen: React.FC = () => {
 
     return (
       <>
+        {/* Financial Stats */}
         <DashboardStats />
 
+        {/* Category Expenses Chart */}
+        <CategoryExpensesChart 
+          data={categoryExpenses}
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={handlePeriodChange}
+        />
+
+        {/* AI Insights and Goal Progress */}
+        <DashboardInsights 
+          aiInsights={aiInsights}
+          goalProgress={goalProgress}
+          onViewAllGoals={handleViewAllGoals}
+          onViewInsight={(insight) => {
+            console.log('Insight pressed:', insight);
+            // TODO: Navigate to specific insight details
+          }}
+        />
+
+        {/* Recent Transactions */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <Text style={styles.sectionTitle}>Transacciones Recientes</Text>
             <TouchableOpacity onPress={handleViewAllTransactions}>
-              <Text style={styles.viewAllText}>View All</Text>
+              <Text style={styles.viewAllText}>Ver Todas</Text>
             </TouchableOpacity>
           </View>
           <RecentTransactions 
@@ -84,10 +139,11 @@ export const DashboardScreen: React.FC = () => {
           />
         </View>
 
-        {!hasPremium && !isLoading && (
+        {/* Premium Upgrade Prompt */}
+        {!hasPremium && !isLoadingData && (
           <UpgradePrompt 
-            feature="unlock all premium features" 
-            currentLimit="3 accounts"
+            feature="desbloquear todas las funciones premium" 
+            currentLimit="funciones básicas"
             style={styles.upgradePrompt}
           />
         )}
@@ -101,33 +157,25 @@ export const DashboardScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl 
-            refreshing={isLoading && !error} 
+            refreshing={isLoadingData && !error} 
             onRefresh={handleRefresh}
             colors={['#3B82F6']}
             tintColor="#3B82F6"
           />
         }
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Welcome back,</Text>
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>{user?.user_metadata?.name || 'User'}</Text>
-              {isPremium && <PremiumBadge />}
-            </View>
-          </View>
-          <TouchableOpacity style={styles.profileButton}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        {/* Enhanced Header */}
+        <DashboardHeader
+          onNotificationsPress={handleNotificationsPress}
+          onSettingsPress={handleSettingsPress}
+          notificationCount={3} // TODO: Get from notifications service
+        />
 
         {renderContent()}
       </ScrollView>
       
+      {/* Floating Action Button */}
       <TouchableOpacity 
         style={styles.fab}
         onPress={handleAddTransaction}
