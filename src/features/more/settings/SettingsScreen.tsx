@@ -31,19 +31,9 @@ interface SettingsState {
   notifications: boolean;
   darkMode: boolean;
   biometricEnabled: boolean;
-  currency: string;
   language: string;
   autoBackup: boolean;
 }
-
-const CURRENCY_OPTIONS = [
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
-  { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-];
 
 const LANGUAGE_OPTIONS = [
   { code: 'en', name: 'English' },
@@ -61,7 +51,6 @@ export const SettingsScreen: React.FC = () => {
     notifications: true,
     darkMode: false,
     biometricEnabled: false,
-    currency: 'USD',
     language: 'en',
     autoBackup: true,
   });
@@ -81,17 +70,6 @@ export const SettingsScreen: React.FC = () => {
     } else {
       saveSettings({ ...settings, biometricEnabled: false });
     }
-  };
-
-  const showCurrencyPicker = () => {
-    const buttons = CURRENCY_OPTIONS.map(currency => ({
-      text: `${currency.name} (${currency.symbol})`,
-      onPress: () => saveSettings({ ...settings, currency: currency.code }),
-    }));
-    
-    buttons.push({ text: 'Cancel', onPress: () => {} });
-    
-    Alert.alert('Select Currency', 'Choose your preferred currency', buttons);
   };
 
   const showLanguagePicker = () => {
@@ -125,10 +103,6 @@ export const SettingsScreen: React.FC = () => {
     );
   };
 
-  const getCurrentCurrency = () => {
-    return CURRENCY_OPTIONS.find(c => c.code === settings.currency)?.name || 'US Dollar';
-  };
-
   const getCurrentLanguage = () => {
     return LANGUAGE_OPTIONS.find(l => l.code === settings.language)?.name || 'English';
   };
@@ -140,11 +114,12 @@ export const SettingsScreen: React.FC = () => {
     onPress?: () => void;
     rightElement?: React.ReactNode;
     showChevron?: boolean;
-  }> = ({ icon, title, subtitle, onPress, rightElement, showChevron = false }) => (
+    disabled?: boolean;
+  }> = ({ icon, title, subtitle, onPress, rightElement, showChevron = false, disabled = false }) => (
     <TouchableOpacity
       style={styles.settingItem}
       onPress={onPress}
-      disabled={!onPress}
+      disabled={!onPress || disabled}
     >
       <View style={styles.settingLeft}>
         <View style={styles.settingIcon}>
@@ -213,14 +188,6 @@ export const SettingsScreen: React.FC = () => {
           />
 
           <SettingItem
-            icon={<DollarSign color="#2563EB" size={20} />}
-            title="Currency"
-            subtitle={getCurrentCurrency()}
-            onPress={showCurrencyPicker}
-            showChevron
-          />
-
-          <SettingItem
             icon={<Globe color="#2563EB" size={20} />}
             title="Language"
             subtitle={getCurrentLanguage()}
@@ -239,26 +206,14 @@ export const SettingsScreen: React.FC = () => {
             subtitle="Use biometric authentication to unlock the app"
             rightElement={
               <Switch
+                disabled
                 value={settings.biometricEnabled}
                 onValueChange={handleBiometricToggle}
                 trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
                 thumbColor={settings.biometricEnabled ? '#2563EB' : '#9CA3AF'}
               />
             }
-          />
-
-          <SettingItem
-            icon={<Lock color="#2563EB" size={20} />}
-            title="Auto Backup"
-            subtitle="Automatically backup data to cloud"
-            rightElement={
-              <Switch
-                value={settings.autoBackup}
-                onValueChange={(value) => saveSettings({ ...settings, autoBackup: value })}
-                trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
-                thumbColor={settings.autoBackup ? '#2563EB' : '#9CA3AF'}
-              />
-            }
+            disabled
           />
         </View>
 

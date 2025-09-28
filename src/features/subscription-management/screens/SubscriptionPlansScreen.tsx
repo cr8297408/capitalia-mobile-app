@@ -91,7 +91,7 @@ export const SubscriptionPlansScreen: React.FC<SubscriptionPlansScreenProps> = (
   };
 
   const formatPrice = (amount: number, currency: string, interval: string) => {
-    const price = amount / 100;
+    const price = amount;
     const formatter = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.toUpperCase(),

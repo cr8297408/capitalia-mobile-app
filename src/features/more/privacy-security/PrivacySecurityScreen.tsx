@@ -129,7 +129,7 @@ export const PrivacySecurityScreen: React.FC = () => {
             statusColor="#10B981"
           />
 
-          <SecurityItem
+          {/* <SecurityItem
             icon={<Eye color="#F59E0B" size={20} />}
             title="Data Usage Tracking"
             description="Monitor how your data is being used within the app"
@@ -138,34 +138,7 @@ export const PrivacySecurityScreen: React.FC = () => {
             onPress={() => {
               // TODO: Navigate to data usage screen
             }}
-          />
-        </View>
-
-        {/* Privacy Controls */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacy Controls</Text>
-          
-          <SecurityItem
-            icon={<UserX color="#EF4444" size={20} />}
-            title="Delete Account"
-            description="Permanently delete your account and all associated data"
-            status="Irreversible"
-            statusColor="#EF4444"
-            onPress={() => {
-              // TODO: Navigate to account deletion flow
-            }}
-          />
-
-          <SecurityItem
-            icon={<FileText color="#2563EB" size={20} />}
-            title="Data Export"
-            description="Download a copy of all your financial data"
-            status="Available"
-            statusColor="#2563EB"
-            onPress={() => {
-              // TODO: Navigate to data export screen
-            }}
-          />
+          /> */}
         </View>
 
         {/* Legal & Policies */}
