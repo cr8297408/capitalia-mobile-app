@@ -38,6 +38,9 @@ export const ProfileScreen: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempYear, setTempYear] = useState('');
+  const [tempMonth, setTempMonth] = useState('');
+  const [tempDay, setTempDay] = useState('');
   const [profile, setProfile] = useState<UserProfile>({
     first_name: '',
     last_name: '',
@@ -196,6 +199,14 @@ export const ProfileScreen: React.FC = () => {
     }
   };
 
+  const openDatePicker = () => {
+    const { year, month, day } = getDateParts();
+    setTempYear(year);
+    setTempMonth(month);
+    setTempDay(day);
+    setShowDatePicker(true);
+  };
+
   const getDateParts = () => {
     if (profile.date_of_birth) {
       const parts = profile.date_of_birth.split('-');
@@ -209,11 +220,6 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const renderDatePicker = () => {
-    const { year, month, day } = getDateParts();
-    const [tempYear, setTempYear] = useState(year);
-    const [tempMonth, setTempMonth] = useState(month);
-    const [tempDay, setTempDay] = useState(day);
-
     const handleSaveDate = () => {
       handleDateChange(tempYear, tempMonth, tempDay);
       setShowDatePicker(false);
@@ -306,7 +312,7 @@ export const ProfileScreen: React.FC = () => {
           // Special handling for date picker
           <TouchableOpacity
             style={styles.datePickerButton}
-            onPress={() => setShowDatePicker(true)}
+            onPress={openDatePicker}
           >
             <Text style={[styles.datePickerText, !profile[key] && styles.placeholderText]}>
               {profile[key] ? formatDate(profile[key]) : placeholder}
