@@ -3,21 +3,23 @@
  * Following Scope Rule Pattern - Screen specific to goal-detail subdirectory
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Target, Plus } from 'lucide-react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { useGoalDetail } from '../../hooks/useGoalDetail';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '@/navigation/types';
+import { useCallback } from 'react';
 
 type GoalDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'GoalDetail'>;
 type GoalDetailScreenRouteProp = RouteProp<RootStackParamList, 'GoalDetail'>;
@@ -27,7 +29,29 @@ export const GoalDetailScreen: React.FC = () => {
   const route = useRoute<GoalDetailScreenRouteProp>();
   const { goalId } = route.params;
   
-  const { goal, contributions, loading } = useGoalDetail(goalId);
+  const { goal, contributions, loading, loadGoalDetail } = useGoalDetail(goalId);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh data when screen comes into focus (e.g., returning from add contribution)
+  useFocusEffect(
+    useCallback(() => {
+      if (goalId) {
+        loadGoalDetail(goalId);
+      }
+    }, [goalId, loadGoalDetail])
+  );
+
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    if (goalId) {
+      setRefreshing(true);
+      try {
+        await loadGoalDetail(goalId);
+      } finally {
+        setRefreshing(false);
+      }
+    }
+  }, [goalId, loadGoalDetail]);
 
   if (loading || !goal) {
     return (
@@ -53,12 +77,25 @@ export const GoalDetailScreen: React.FC = () => {
           <ArrowLeft size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Goal Details</Text>
-        <TouchableOpacity style={styles.headerButton}>
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={() => navigation.navigate('AddGoalContribution', { goalId })}
+        >
           <Plus size={24} color="#374151" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor="#3B82F6"
+            title="Updating goal..."
+          />
+        }
+      >
         {/* Goal Header */}
         <View style={[styles.goalCard, { backgroundColor: goal.color ? `${goal.color}10` : '#F9FAFB' }]}>
           <View style={styles.goalHeader}>

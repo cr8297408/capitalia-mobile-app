@@ -17,6 +17,7 @@ import { AddBudgetScreen } from '@/features/budget-management/budget-add/screens
 import { EditBudgetScreen } from '@/features/budget-management/budget-edit/screens';
 import { AddGoalScreen } from '@/features/goal-tracking/screens/AddGoalScreen';
 import { EditGoalScreen } from '@/features/goal-tracking/screens/EditGoalScreen';
+import { AddGoalContributionScreen } from '@/features/goal-management/goal-contribution-add';
 
 // Subscription screens
 import { SubscriptionPlansScreen } from '@/features/subscription-management/screens/SubscriptionPlansScreen';
@@ -87,6 +88,11 @@ export const AppNavigator: React.FC = () => {
               name="EditGoal"
               component={EditGoalScreen}
               options={{ headerShown: true, title: 'Edit Goal' }}
+            />
+            <Stack.Screen
+              name="AddGoalContribution"
+              component={AddGoalContributionScreen}
+              options={{ headerShown: false }}
             />
             
             {/* Subscription Modal Screens */}
