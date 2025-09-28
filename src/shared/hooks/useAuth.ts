@@ -19,6 +19,9 @@ export const useAuth = () => {
   });
 
   const { subscription, isPremium, limits, refreshSubscription } = usePremiumFeatures();
+  console.log("🚀 ~ useAuth ~ subscription:", subscription)
+  console.log("🚀 ~ useAuth ~ isPremium:", isPremium)
+  console.log("🚀 ~ useAuth ~ limits:", limits)
 
   useEffect(() => {
     // Get initial session

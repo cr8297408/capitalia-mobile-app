@@ -73,7 +73,7 @@ serve(async (req: Request) => {
 
     if (subscription && subscription.subscription_plans) {
       const plan = subscription.subscription_plans
-      isPremium = true
+      isPremium = subscription.subscription_plans.stripe_price_id !== 'price_free'
       limits = {
         maxTransactions: plan.max_transactions,
         maxAccounts: plan.max_accounts,
