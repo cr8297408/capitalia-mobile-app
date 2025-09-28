@@ -14,6 +14,8 @@ interface CategoryExpense {
   percentage: number;
   color: string;
   icon: string;
+  type?: 'expense' | 'budget';  // Para diferenciar gastos reales de presupuestos
+  budgetAmount?: number;  // Monto total del presupuesto (solo para type: 'budget')
 }
 
 export type PeriodType = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year';
@@ -35,7 +37,7 @@ const PERIOD_OPTIONS = [
 
 export const CategoryExpensesChart: React.FC<CategoryExpensesChartProps> = ({
   data,
-  title = 'Gastos por Categoría',
+  title = 'Gastos y Presupuestos',
   selectedPeriod = 'this_month',
   onPeriodChange,
 }) => {
@@ -102,12 +104,19 @@ export const CategoryExpensesChart: React.FC<CategoryExpensesChartProps> = ({
             <View style={styles.barInfo}>
               <View style={styles.categoryInfo}>
                 <Text style={styles.categoryIcon}>
-                  {getIconEmoji(item.icon)}
+                  {item.type === 'budget' ? '📊' : getIconEmoji(item.icon)}
                 </Text>
-                <Text style={styles.categoryName}>{item.category}</Text>
+                <View style={styles.categoryDetails}>
+                  <Text style={styles.categoryName}>{item.category}</Text>
+                  {item.type === 'budget' && item.budgetAmount && (
+                    <Text style={styles.budgetSubtext}>
+                      {formatCurrency(item.amount)} de {formatCurrency(item.budgetAmount)}
+                    </Text>
+                  )}
+                </View>
               </View>
               <Text style={styles.categoryAmount}>
-                {formatCurrency(item.amount)}
+                {item.type === 'budget' ? `${item.percentage}%` : formatCurrency(item.amount)}
               </Text>
             </View>
             
@@ -117,7 +126,9 @@ export const CategoryExpensesChart: React.FC<CategoryExpensesChartProps> = ({
                   styles.barFill, 
                   { 
                     width: `${item.percentage}%`,
-                    backgroundColor: item.color
+                    backgroundColor: item.type === 'budget' 
+                      ? (item.percentage > 80 ? '#EF4444' : item.percentage > 60 ? '#F59E0B' : '#10B981')
+                      : item.color
                   }
                 ]} 
               />
@@ -245,11 +256,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 12,
   },
+  categoryDetails: {
+    flex: 1,
+  },
   categoryName: {
     fontSize: 16,
     fontWeight: '500',
     color: '#374151',
     flex: 1,
+  },
+  budgetSubtext: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
   },
   categoryAmount: {
     fontSize: 16,

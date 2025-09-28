@@ -16,6 +16,8 @@ interface CategoryExpense {
   percentage: number;
   color: string;
   icon: string;
+  type?: 'expense' | 'budget';  // Para diferenciar gastos reales de presupuestos
+  budgetAmount?: number;  // Monto total del presupuesto (solo para type: 'budget')
 }
 
 interface AIInsight {
@@ -108,7 +110,7 @@ export function useDashboardInsights() {
       const { startDate, endDate } = getDateRange(period);
       
       // Query to get category expenses with real data from database
-      const { data, error } = await supabase
+      const { data: expenseData, error: expenseError } = await supabase
         .from('transactions')
         .select(`
           id,
@@ -126,13 +128,33 @@ export function useDashboardInsights() {
         .lte('date', endDate.split('T')[0])
         .not('categories', 'is', null);
 
-      if (error) {
-        throw new Error(`Error fetching category expenses: ${error.message}`);
+      if (expenseError) {
+        throw new Error(`Error fetching category expenses: ${expenseError.message}`);
       }
 
-      if (!data || data.length === 0) {
-        setCategoryExpenses([]);
-        return;
+      // Query to get active budgets with their categories
+      const { data: budgetData, error: budgetError } = await supabase
+        .from('budgets')
+        .select(`
+          id,
+          name,
+          amount,
+          spent_amount,
+          category_id,
+          categories (
+            id,
+            name,
+            icon,
+            color
+          )
+        `)
+        .eq('is_active', true)
+        .gte('end_date', startDate.split('T')[0])
+        .lte('start_date', endDate.split('T')[0])
+        .not('categories', 'is', null);
+
+      if (budgetError) {
+        console.warn('Error fetching budgets:', budgetError.message);
       }
 
       // Group expenses by category
@@ -143,32 +165,35 @@ export function useDashboardInsights() {
         color: string;
       }> = {};
 
-      data.forEach((transaction: any) => {
-        const category = transaction.categories;
-        if (category && category.name) {
-          const categoryId = category.id;
-          const amount = Math.abs(transaction.amount); // Convert to positive for expenses
-          
-          if (!categoryTotals[categoryId]) {
-            categoryTotals[categoryId] = {
-              name: category.name,
-              total: 0,
-              icon: category.icon || 'tag',
-              color: category.color || '#6B7280',
-            };
+      // Process expense data
+      if (expenseData && expenseData.length > 0) {
+        expenseData.forEach((transaction: any) => {
+          const category = transaction.categories;
+          if (category && category.name) {
+            const categoryId = category.id;
+            const amount = Math.abs(transaction.amount); // Convert to positive for expenses
+            
+            if (!categoryTotals[categoryId]) {
+              categoryTotals[categoryId] = {
+                name: category.name,
+                total: 0,
+                icon: category.icon || 'tag',
+                color: category.color || '#6B7280',
+              };
+            }
+            
+            categoryTotals[categoryId].total += amount;
           }
-          
-          categoryTotals[categoryId].total += amount;
-        }
-      });
+        });
+      }
 
-      // Calculate total expenses and percentages
+      // Calculate total expenses for percentage calculation
       const totalExpenses = Object.values(categoryTotals).reduce(
         (sum, category) => sum + category.total, 0
       );
 
-      // Create category expenses array with percentages
-      const categories = Object.entries(categoryTotals)
+      // Create category expenses array
+      const expenseCategories = Object.entries(categoryTotals)
         .map(([categoryId, categoryData]) => ({
           category: categoryData.name,
           categoryId,
@@ -176,13 +201,41 @@ export function useDashboardInsights() {
           percentage: totalExpenses > 0 ? Math.round((categoryData.total / totalExpenses) * 100) : 0,
           color: categoryData.color,
           icon: categoryData.icon,
-        }))
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5); // Top 5 categories
+          type: 'expense' as const,
+        }));
 
-      setCategoryExpenses(categories);
+      // Process budget data and add to the mix
+      const budgetCategories: CategoryExpense[] = [];
+      if (budgetData && budgetData.length > 0) {
+        budgetData.forEach((budget: any) => {
+          const category = budget.categories;
+          if (category && category.name) {
+            const spentAmount = budget.spent_amount || 0;
+            const budgetAmount = budget.amount || 0;
+            const percentage = budgetAmount > 0 ? Math.round((spentAmount / budgetAmount) * 100) : 0;
+            
+            budgetCategories.push({
+              category: `${category.name} (Presupuesto)`,
+              categoryId: budget.id, // Use budget ID for uniqueness
+              amount: spentAmount,
+              percentage,
+              color: category.color || '#6B7280',
+              icon: category.icon || 'tag',
+              type: 'budget' as const,
+              budgetAmount,
+            });
+          }
+        });
+      }
+
+      // Combine expenses and budgets, sort by amount
+      const allCategories = [...expenseCategories, ...budgetCategories]
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 8); // Show more items since we have both expenses and budgets
+
+      setCategoryExpenses(allCategories);
     } catch (err) {
-      console.error('Error loading category expenses:', err);
+      console.error('Error loading category expenses and budgets:', err);
       throw err;
     }
   }, [getDateRange]);
