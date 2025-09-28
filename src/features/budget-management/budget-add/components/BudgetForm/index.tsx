@@ -19,6 +19,34 @@ export interface BudgetFormData extends Omit<SharedBudgetFormData, 'alertThresho
   alertThreshold: string; // Keep as string for form input, will be converted to number on submit
 }
 
+// Utility functions for currency formatting
+const formatCurrency = (value: string): string => {
+  // Remove all non-numeric characters except dots
+  const numericValue = value.replace(/[^0-9.]/g, '');
+  
+  // Handle empty string
+  if (!numericValue) return '';
+  
+  // Split by decimal point
+  const parts = numericValue.split('.');
+  const integerPart = parts[0];
+  const decimalPart = parts[1];
+  
+  // Add thousands separators to integer part
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  // Return with decimal part if it exists
+  if (decimalPart !== undefined) {
+    return `${formattedInteger}.${decimalPart.slice(0, 2)}`; // Limit to 2 decimal places
+  }
+  
+  return formattedInteger;
+};
+
+const parseCurrencyToNumber = (value: string): string => {
+  return value.replace(/,/g, '');
+};
+
 interface BudgetFormProps {
   formData: BudgetFormData;
   setFormData: React.Dispatch<React.SetStateAction<BudgetFormData>>;
@@ -64,8 +92,11 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           <Text style={styles.currencySymbol}>$</Text>
           <TextInput
             style={[styles.input, { paddingLeft: 30 }]}
-            value={formData.amount}
-            onChangeText={text => setFormData({ ...formData, amount: text.replace(/[^0-9.]/g, '') })}
+            value={formatCurrency(formData.amount)}
+            onChangeText={text => {
+              const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+              setFormData({ ...formData, amount: parsedValue });
+            }}
             placeholder="0.00"
             keyboardType="decimal-pad"
             placeholderTextColor="#9CA3AF"
@@ -81,7 +112,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           onPress={() => !isLoading && setShowDatePicker('start')}
           disabled={isLoading}
         >
-          <Calendar size={20} color="#6B7280" style={styles.icon} />
+          <Calendar size={20} color="#6B7280" />
           <Text style={styles.dateText}>
             {formData.startDate.toLocaleDateString()}
           </Text>
@@ -95,7 +126,7 @@ export const BudgetForm: React.FC<BudgetFormProps> = ({
           onPress={() => !isLoading && setShowDatePicker('end')}
           disabled={isLoading}
         >
-          <Calendar size={20} color="#6B7280" style={styles.icon} />
+          <Calendar size={20} color="#6B7280" />
           <Text style={styles.dateText}>
             {formData.endDate.toLocaleDateString()}
           </Text>
@@ -263,17 +294,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     borderRadius: 12,
-    padding: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     backgroundColor: '#F9FAFB',
     height: 52,
     width: '100%',
-    position: 'relative',
     marginTop: 4,
   },
   dateText: {
     fontSize: 16,
     color: '#111827',
-    marginLeft: 12,
+    marginLeft: 12, // Back to 12 since we removed absolute positioning
+    flex: 1,
   },
   alertThresholdHeader: {
     flexDirection: 'row',
