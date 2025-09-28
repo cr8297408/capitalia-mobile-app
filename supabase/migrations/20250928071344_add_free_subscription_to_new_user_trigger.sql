@@ -23,7 +23,7 @@ BEGIN
 
   -- Get the free plan ID
   SELECT id INTO free_plan_id 
-  FROM subscription_plans 
+  FROM public.subscription_plans 
   WHERE stripe_price_id = 'price_free' 
   AND is_active = true 
   LIMIT 1;
@@ -41,7 +41,7 @@ BEGIN
     ) VALUES (
       new.id,
       'free_' || new.id, -- Generate a unique identifier for free subscriptions
-      'active'::subscription_status,
+      'active'::public.subscription_status,
       now(),
       now() + interval '100 years', -- Free plan never expires
       false,
