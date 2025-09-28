@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Trash2, Pencil } from 'lucide-react-native';
 import type { Transaction as BaseTransaction } from '../../../../shared/types/transaction';
+import { formatCurrencyDisplay } from '../../../../shared/utils/currencyFormatter';
 
 // Extend the base Transaction type to include additional fields
 interface Transaction extends BaseTransaction {
@@ -53,7 +54,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
       
       <View style={styles.rightContent}>
         <Text style={[styles.amount, { color: amountColor }]}>
-          {isExpense ? '-' : '+'} ${Math.abs(transaction.amount).toFixed(2)}
+          {isExpense ? '-' : '+'} {formatCurrencyDisplay(Math.abs(transaction.amount))}
         </Text>
         <View style={styles.actions}>
           <TouchableOpacity 

@@ -129,7 +129,7 @@ export const BudgetDetailScreen: React.FC = () => {
           </View>
           <Text style={styles.statusDescription}>
             {progress && progress.percentage > 100
-              ? `You've exceeded your budget by $${(progress.spent - budget.amount).toFixed(2)}`
+              ? `You've exceeded your budget by ${formatCurrencyDisplay(progress.spent - budget.amount)}`
               : progress && progress.percentage >= (budget.alert_threshold * 100)
               ? `You're approaching your ${budget.alert_threshold * 100}% alert threshold`
               : 'Your spending is within budget limits'

@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Pencil } from 'lucide-react-native';
 import type { AccountItem as AccountItemType } from '../types/account.types';
+import { formatCurrencyDisplay } from '../../../../shared/utils/currencyFormatter';
 
 type AccountItemProps = {
   account: AccountItemType;
@@ -39,7 +40,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({
           </Text>
         </View>
         <Text style={styles.accountBalance}>
-          {account.currency} {Number(account.balance).toFixed(2)}
+          {account.currency} {Number(account.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </Text>
       </TouchableOpacity>
       {onEdit && (

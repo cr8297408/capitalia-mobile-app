@@ -225,7 +225,7 @@ export const AccountDetailScreen: React.FC<AccountDetailScreenProps> = ({ route,
                       transaction.type === 'income' ? screenStyles.incomeAmount : screenStyles.expenseAmount
                     ]}
                   >
-                    {transaction.type === 'income' ? '+' : '-'} {account?.currency || '$'} {Math.abs(Number(transaction.amount)).toFixed(2)}
+                    {transaction.type === 'income' ? '+' : '-'} {account?.currency || '$'} {Math.abs(Number(transaction.amount)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Text>
                 </TouchableOpacity>
               ))}

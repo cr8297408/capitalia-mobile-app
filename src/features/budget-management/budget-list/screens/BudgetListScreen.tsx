@@ -12,6 +12,7 @@ import { Plus, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react-nati
 import { useAuth } from '@/shared/hooks/useAuth';
 import { UpgradePrompt } from '@/shared/components/ui/UpgradePrompt';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { formatCurrencyDisplay } from '../../../../shared/utils/currencyFormatter';
 import { useBudgets } from '../hooks/useBudgets';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { BudgetStackParamList } from '@/navigation/types';
@@ -61,10 +62,10 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onPress }) => {
       <View style={styles.cardContent}>
         <View style={styles.amountRow}>
           <Text style={styles.spentAmount}>
-            ${budget.spent_amount.toFixed(2)}
+            {formatCurrencyDisplay(budget.spent_amount)}
           </Text>
           <Text style={styles.totalAmount}>
-            of ${budget.amount.toFixed(2)}
+            of {formatCurrencyDisplay(budget.amount)}
           </Text>
         </View>
 
@@ -82,7 +83,7 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onPress }) => {
 
         <View style={styles.footerRow}>
           <Text style={styles.remainingText}>
-            {remaining >= 0 ? `$${remaining.toFixed(2)} left` : `$${Math.abs(remaining).toFixed(2)} over`}
+            {remaining >= 0 ? `${formatCurrencyDisplay(remaining)} left` : `${formatCurrencyDisplay(Math.abs(remaining))} over`}
           </Text>
           <Text style={styles.periodText}>
             {budget.period}

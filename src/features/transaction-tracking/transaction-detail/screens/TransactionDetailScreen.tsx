@@ -31,6 +31,7 @@ import {
   RefreshCw, 
   DollarSign 
 } from 'lucide-react-native';
+import { formatCurrencyDisplay } from '../../../../shared/utils/currencyFormatter';
 
 import { useTransactionDetailScreen } from '../hooks/useTransactionDetailScreen';
 
@@ -238,7 +239,7 @@ export const TransactionDetailScreen = () => {
           </View>
           <View style={{ marginLeft: 16, flex: 1 }}>
             <Text style={[styles.amount, { color: amountColor }]}>
-              {amountPrefix}${transaction.amount.toFixed(2)}
+              {amountPrefix}{formatCurrencyDisplay(transaction.amount)}
             </Text>
             <Text style={styles.description}>
               {transaction.description || 'Sin descripción'}

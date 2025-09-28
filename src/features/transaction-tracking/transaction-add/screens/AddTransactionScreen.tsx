@@ -9,7 +9,7 @@ import { useTransactionForm } from '../hooks/useTransactionForm';
 import { useCategories } from '@/shared/hooks/useCategories';
 import { useBudgets } from '@/shared/hooks/useBudgets';
 import { styles } from '../styles/addTransactionScreen.styles';
-import { formatCurrency, parseCurrencyToNumber } from '@/shared/utils/currencyFormatter';
+import { formatCurrency, parseCurrencyToNumber, formatCurrencyDisplay } from '@/shared/utils/currencyFormatter';
 
 type Account = {
   id: string;
@@ -353,7 +353,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                             <View>
                               <Text style={styles.budgetName}>{budget.name}</Text>
                               <Text style={styles.budgetSubtext}>
-                                ${budget.spent_amount.toFixed(2)} / ${budget.amount.toFixed(2)}
+                                {formatCurrencyDisplay(budget.spent_amount)} / {formatCurrencyDisplay(budget.amount)}
                               </Text>
                             </View>
                             {budgetId === budget.id && (
