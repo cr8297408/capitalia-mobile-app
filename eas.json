@@ -6,19 +6,33 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_NAME": "Capitalia Dev",
+        "EXPO_PUBLIC_ENVIRONMENT": "development"
+      }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "app-bundle"
-      }
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_NAME": "Capitalia Preview",
+        "EXPO_PUBLIC_ENVIRONMENT": "preview"
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
-      }
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_NAME": "Capitalia",
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      },
+      "channel": "production"
     }
   },
   "submit": {

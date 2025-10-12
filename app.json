@@ -27,11 +27,12 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "89f71066-0173-4599-a29b-e2eb03f88ed2"
+        "projectId": "f8efdedc-ff46-425c-b25a-6bbcd3bde2af"
       }
     },
     "android": {
-      "package": "com.cr8297408.capitaliaapp"
-    }
+      "package": "com.cr8297408.capitalia"
+    },
+    "owner": "cr8297408"
   }
 }
