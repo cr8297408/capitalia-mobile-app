@@ -212,7 +212,7 @@ export const MoreScreen: React.FC = () => {
 
         {/* App Version */}
         <View style={styles.footer}>
-          <Text style={styles.versionText}>Version 1.0.0</Text>
+          <Text style={styles.versionText}>Version 1.0.1</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

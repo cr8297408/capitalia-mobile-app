@@ -17,14 +17,14 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { PremiumBadge } from '@/shared/components/ui/PremiumBadge';
-import { useStripeCheckout } from '../hooks/useStripeCheckout';
+import { useWompiCheckout } from '../hooks/useWompiCheckout';
 import type { RootStackScreenProps } from '@/navigation/types';
 
 type BillingScreenProps = RootStackScreenProps<'Billing'>;
 
 export const BillingScreen: React.FC<BillingScreenProps> = ({ navigation }) => {
   const { user, subscription, isPremium } = useAuth();
-  const { createCustomerPortalSession, isProcessing } = useStripeCheckout();
+  const { createCustomerPortalSession, isProcessing } = useWompiCheckout();
 
   const handleOpenBillingPortal = async () => {
     if (!user) return;

@@ -13,14 +13,14 @@ import { Crown, Check, X } from 'lucide-react-native';
 import { supabase } from '@/infrastructure/supabase/client';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { PremiumBadge } from '@/shared/components/ui/PremiumBadge';
-import { useStripeCheckout } from '../hooks/useStripeCheckout';
+import { useWompiCheckout } from '../hooks/useWompiCheckout';
 import type { RootStackScreenProps } from '@/navigation/types';
 
 type SubscriptionPlansScreenProps = RootStackScreenProps<'SubscriptionPlans'>;
 
 interface SubscriptionPlan {
   id: string;
-  stripe_price_id: string;
+  wompi_price_id: string;
   name: string;
   amount: number;
   currency: string;
@@ -42,7 +42,7 @@ export const SubscriptionPlansScreen: React.FC<SubscriptionPlansScreenProps> = (
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   
   const { user, isPremium } = useAuth();
-  const { createCheckoutSession, isProcessing } = useStripeCheckout();
+  const { createCheckoutSession, isProcessing } = useWompiCheckout();
 
   useEffect(() => {
     fetchPlans();
@@ -80,7 +80,7 @@ export const SubscriptionPlansScreen: React.FC<SubscriptionPlansScreenProps> = (
 
     try {
       setSelectedPlan(plan.id);
-      await createCheckoutSession(plan.stripe_price_id, user.id);
+      await createCheckoutSession(plan.wompi_price_id, user.id);
       // Checkout will handle navigation on success/cancel
     } catch (error: any) {
       console.error('Checkout error:', error);

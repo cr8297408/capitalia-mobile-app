@@ -5,7 +5,7 @@ export default {
   expo: {
     name: IS_DEV ? 'Capitalia Dev' : IS_PREVIEW ? 'Capitalia Preview' : 'Capitalia',
     slug: 'capitalia',
-    version: '1.0.0',
+    version: '1.0.1',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
@@ -14,10 +14,10 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV 
-        ? 'com.cr8297408.capitaliaapp.dev' 
+        ? 'com.cr8297408.capitalia.dev' 
         : IS_PREVIEW 
-          ? 'com.cr8297408.capitaliaapp.preview'
-          : 'com.cr8297408.capitaliaapp'
+          ? 'com.cr8297408.capitalia.preview'
+          : 'com.cr8297408.capitalia'
     },
     web: {
       bundler: 'metro',
@@ -49,14 +49,14 @@ export default {
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       stripePublishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       appName: process.env.EXPO_PUBLIC_APP_NAME || 'Capitalia',
-      appVersion: process.env.EXPO_PUBLIC_APP_VERSION || '1.0.0'
+      appVersion: process.env.EXPO_PUBLIC_APP_VERSION || '1.0.1'
     },
     android: {
       package: IS_DEV 
-        ? 'com.cr8297408.capitaliaapp.dev' 
+        ? 'com.cr8297408.capitalia.dev' 
         : IS_PREVIEW 
-          ? 'com.cr8297408.capitaliaapp.preview'
-          : 'com.cr8297408.capitaliaapp',
+          ? 'com.cr8297408.capitalia.preview'
+          : 'com.cr8297408.capitalia',
       versionCode: 1,
       adaptiveIcon: {
         foregroundImage: './assets/images/icon.png',
