@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "capitalia",
-    "slug": "capitalia",
-    "version": "1.0.1",
+    "name": "capitaliaapp",
+    "slug": "capitaliaapp",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -31,7 +31,7 @@
       }
     },
     "android": {
-      "package": "com.cr8297408.capitalia"
+      "package": "com.cr8297408.capitaliaapp"
     },
     "owner": "cr8297408"
   }
