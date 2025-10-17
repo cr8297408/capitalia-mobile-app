@@ -5,6 +5,7 @@
   },
   "build": {
     "development": {
+      "autoIncrement": true,
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -13,6 +14,7 @@
       }
     },
     "preview": {
+      "autoIncrement": true,
       "distribution": "internal",
       "android": {
         "buildType": "app-bundle"
