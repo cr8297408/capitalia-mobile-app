@@ -231,6 +231,74 @@ Luego usa `capitalia.p12` en el comando PEPK.
 
 ---
 
+### **Error: Unable to export or encrypt the private key**
+
+Este error ocurre cuando la contraseña del keystore o de la clave (key alias) es incorrecta. Aquí tienes los pasos para solucionarlo:
+
+---
+
+#### **Paso 1: Verificar la Contraseña del Keystore**
+1. Asegúrate de estar usando la contraseña correcta para el archivo `@cr8297408__capitalia.jks`.
+2. Si no recuerdas la contraseña, intenta buscarla en:
+   - Archivos de configuración (`eas.json`, `.env`, `gradle.properties`).
+   - Historial de comandos (`history | grep keytool`).
+   - Gestores de contraseñas (1Password, Keychain, etc.).
+
+---
+
+#### **Paso 2: Verificar el Alias y la Contraseña de la Clave**
+1. Lista los alias disponibles en el keystore:
+   ```bash
+   keytool -list -v -keystore @cr8297408__capitalia.jks
+   ```
+2. Verifica que el alias usado (`5f284a1b32ade7aa5cc56924bf657d63`) exista en la lista.
+3. Si el alias es correcto, asegúrate de usar la contraseña correcta para la clave.
+
+---
+
+#### **Paso 3: Convertir el Keystore a PKCS12 (Opcional)**
+Si sospechas que el formato del keystore está causando problemas, conviértelo a PKCS12:
+```bash
+keytool -importkeystore \
+  -srckeystore @cr8297408__capitalia.jks \
+  -destkeystore capitalia.p12 \
+  -deststoretype PKCS12 \
+  -srcalias 5f284a1b32ade7aa5cc56924bf657d63 \
+  -destalias capitalia
+```
+Luego usa `capitalia.p12` en lugar de `@cr8297408__capitalia.jks`.
+
+---
+
+#### **Paso 4: Solicitar un Reset de la Clave de Carga**
+Si no puedes recuperar la contraseña o el alias correcto:
+1. Ve a Google Play Console → **Configuración** → **Firma de apps**.
+2. Busca la opción **"Cambiar clave de carga"** o **"Request upload key reset"**.
+3. Genera un nuevo keystore:
+   ```bash
+   keytool -genkey -v -keystore new-upload-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   ```
+4. Genera el archivo `encrypted-private-key.zip` con el nuevo keystore:
+   ```bash
+   java -jar pepk.jar \
+     --keystore=new-upload-key.jks \
+     --alias=upload \
+     --output=encrypted-private-key.zip \
+     --include-cert \
+     --rsa-aes-encryption \
+     --encryption-key-path=encryption_public_key.pem
+   ```
+5. Sube el archivo `encrypted-private-key.zip` a Google Play Console.
+
+---
+
+#### **Paso 5: Verificar el Proceso**
+1. Genera un nuevo AAB firmado con el keystore correcto.
+2. Sube el AAB a Google Play Console.
+3. Verifica que la huella digital coincida con la esperada.
+
+---
+
 ## 📝 Checklist Completo
 
 - [ ] Ir a Google Play Console → Tu app → Configuración → Firma de apps

@@ -5,7 +5,7 @@ export default {
   expo: {
     name: IS_DEV ? 'Capitalia Dev' : IS_PREVIEW ? 'Capitalia Preview' : 'Capitalia',
     slug: 'capitalia',
-    version: '1.0.2',
+    version: '2.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
@@ -49,7 +49,7 @@ export default {
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
       stripePublishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       appName: process.env.EXPO_PUBLIC_APP_NAME || 'Capitalia',
-      appVersion: process.env.EXPO_PUBLIC_APP_VERSION || '1.0.2'
+      appVersion: process.env.EXPO_PUBLIC_APP_VERSION || '2.0.0'
     },
     android: {
       package: 'com.cr8297408.capitaliaapp',
