@@ -52,11 +52,7 @@ export default {
       appVersion: process.env.EXPO_PUBLIC_APP_VERSION || '1.0.2'
     },
     android: {
-      package: IS_DEV 
-        ? 'com.cr8297408.capitalia.dev' 
-        : IS_PREVIEW 
-          ? 'com.cr8297408.capitalia.preview'
-          : 'com.cr8297408.capitalia',
+      package: 'com.cr8297408.capitaliaapp',
       versionCode: 1,
       adaptiveIcon: {
         foregroundImage: './assets/images/icon.png',
