@@ -12,7 +12,8 @@ if (!wompiPublicKey) {
 
 export const wompiConfig = {
   publicKey: wompiPublicKey,
-  apiUrl: 'https://production.wompi.co/v1',
+  apiUrl:
+    process.env.EXPO_PUBLIC_WOMPI_API_URL || 'https://production.wompi.co/v1',
   currency: 'COP', // Colombian Pesos
   merchantId: process.env.EXPO_PUBLIC_WOMPI_MERCHANT_ID || '',
 };

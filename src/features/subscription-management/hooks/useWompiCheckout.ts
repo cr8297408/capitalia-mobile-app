@@ -13,29 +13,36 @@ import type { WompiCheckoutSession } from '@/infrastructure/wompi/wompi-client';
 
 export const useWompiCheckout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [checkoutSession, setCheckoutSession] = useState<WompiCheckoutSession | null>(null);
+  const [checkoutSession, setCheckoutSession] =
+    useState<WompiCheckoutSession | null>(null);
 
   /**
    * Crea una sesión de checkout y abre el enlace de pago de Wompi
    */
   const createCheckoutSession = async (priceId: string, userId: string) => {
     setIsProcessing(true);
+    console.log(priceId, userId);
     try {
       // Get user data
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('User not authenticated');
       }
 
       // Call Edge Function to create checkout session
-      const { data, error } = await supabase.functions.invoke('create-wompi-checkout', {
-        body: {
-          priceId,
-          userId,
-          email: user.email,
-          customerName: user.user_metadata?.first_name || user.email,
+      const { data, error } = await supabase.functions.invoke(
+        'create-wompi-checkout',
+        {
+          body: {
+            priceId,
+            userId,
+            email: user.email,
+            customerName: user.user_metadata?.first_name || user.email,
+          },
         },
-      });
+      );
 
       if (error) {
         throw error;
@@ -61,10 +68,10 @@ export const useWompiCheckout = () => {
 
       return data;
     } catch (error: any) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error creating checkout session:', JSON.stringify(error));
       Alert.alert(
         'Error',
-        error.message || 'Failed to create checkout session. Please try again.'
+        error.message || 'Failed to create checkout session. Please try again.',
       );
       throw error;
     } finally {
@@ -84,15 +91,15 @@ export const useWompiCheckout = () => {
       Alert.alert(
         'Gestionar Suscripción',
         'Puedes gestionar tu suscripción desde esta pantalla',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
-      
+
       return { success: true };
     } catch (error: any) {
       console.error('Error accessing customer portal:', error);
       Alert.alert(
         'Error',
-        'Failed to access customer portal. Please try again.'
+        'Failed to access customer portal. Please try again.',
       );
       throw error;
     } finally {
@@ -106,9 +113,12 @@ export const useWompiCheckout = () => {
   const cancelSubscription = async (userId: string) => {
     setIsProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('cancel-subscription-wompi', {
-        body: { userId },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        'cancel-subscription-wompi',
+        {
+          body: { userId },
+        },
+      );
 
       if (error) {
         throw error;
@@ -117,7 +127,7 @@ export const useWompiCheckout = () => {
       Alert.alert(
         'Suscripción Cancelada',
         'Tu suscripción ha sido cancelada exitosamente',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
 
       return data;
@@ -125,7 +135,7 @@ export const useWompiCheckout = () => {
       console.error('Error canceling subscription:', error);
       Alert.alert(
         'Error',
-        error.message || 'Failed to cancel subscription. Please try again.'
+        error.message || 'Failed to cancel subscription. Please try again.',
       );
       throw error;
     } finally {
@@ -138,7 +148,8 @@ export const useWompiCheckout = () => {
    */
   const checkTransactionStatus = async (transactionId: string) => {
     try {
-      const transaction = await wompiService.getTransactionStatus(transactionId);
+      const transaction =
+        await wompiService.getTransactionStatus(transactionId);
       return transaction;
     } catch (error) {
       console.error('Error checking transaction status:', error);

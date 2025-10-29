@@ -5,7 +5,10 @@
  */
 
 import { wompiConfig } from './wompi-client';
-import type { WompiAcceptanceToken, WompiPaymentSourceToken } from './wompi-client';
+import type {
+  WompiAcceptanceToken,
+  WompiPaymentSourceToken,
+} from './wompi-client';
 
 class WompiService {
   private baseUrl = wompiConfig.apiUrl;
@@ -16,12 +19,15 @@ class WompiService {
    */
   async getAcceptanceToken(): Promise<WompiAcceptanceToken> {
     try {
-      const response = await fetch(`${this.baseUrl}/merchants/${this.publicKey}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.baseUrl}/merchants/${this.publicKey}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Failed to get acceptance token');
@@ -53,7 +59,7 @@ class WompiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.publicKey}`,
+          Authorization: `Bearer ${this.publicKey}`,
         },
         body: JSON.stringify(cardData),
       });
@@ -92,7 +98,7 @@ class WompiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.publicKey}`,
+          Authorization: `Bearer ${this.publicKey}`,
         },
         body: JSON.stringify({
           acceptance_token: transactionData.acceptanceToken,
@@ -107,7 +113,9 @@ class WompiService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.reason || 'Failed to create transaction');
+        throw new Error(
+          errorData.error?.reason || 'Failed to create transaction',
+        );
       }
 
       const data = await response.json();
@@ -123,13 +131,16 @@ class WompiService {
    */
   async getTransactionStatus(transactionId: string) {
     try {
-      const response = await fetch(`${this.baseUrl}/transactions/${transactionId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.publicKey}`,
+      const response = await fetch(
+        `${this.baseUrl}/transactions/${transactionId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.publicKey}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Failed to get transaction status');
@@ -151,10 +162,11 @@ class WompiService {
     amountInCents: number;
     currency?: string;
     redirectUrl?: string;
+    publicKey?: string;
   }): string {
     const currency = params.currency || wompiConfig.currency;
     const queryParams = new URLSearchParams({
-      'public-key': this.publicKey,
+      'public-key': params.publicKey || this.publicKey,
       currency: currency,
       'amount-in-cents': params.amountInCents.toString(),
       reference: params.reference,
