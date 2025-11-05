@@ -40,16 +40,6 @@ BEGIN
       WHERE id = NEW.budget_id
         AND NEW.date >= start_date 
         AND NEW.date <= end_date;
-    -- Fallback to category-based logic for backward compatibility
-    ELSIF NEW.budget_id IS NULL AND NEW.category_id IS NOT NULL AND NEW.type = 'expense' THEN
-      UPDATE budgets 
-      SET spent_amount = spent_amount + NEW.amount,
-          updated_at = now()
-      WHERE category_id = NEW.category_id
-        AND user_id = NEW.user_id
-        AND is_active = true
-        AND NEW.date >= start_date 
-        AND NEW.date <= end_date;
     END IF;
     
     RETURN NEW;
@@ -65,15 +55,6 @@ BEGIN
       WHERE id = OLD.budget_id
         AND OLD.date >= start_date 
         AND OLD.date <= end_date;
-    ELSIF OLD.budget_id IS NULL AND OLD.category_id IS NOT NULL AND OLD.type = 'expense' THEN
-      UPDATE budgets 
-      SET spent_amount = spent_amount - OLD.amount,
-          updated_at = now()
-      WHERE category_id = OLD.category_id
-        AND user_id = OLD.user_id
-        AND is_active = true
-        AND OLD.date >= start_date 
-        AND OLD.date <= end_date;
     END IF;
 
     -- Add new amount to new budget (if any)
@@ -82,15 +63,6 @@ BEGIN
       SET spent_amount = spent_amount + NEW.amount,
           updated_at = now()
       WHERE id = NEW.budget_id
-        AND NEW.date >= start_date 
-        AND NEW.date <= end_date;
-    ELSIF NEW.budget_id IS NULL AND NEW.category_id IS NOT NULL AND NEW.type = 'expense' THEN
-      UPDATE budgets 
-      SET spent_amount = spent_amount + NEW.amount,
-          updated_at = now()
-      WHERE category_id = NEW.category_id
-        AND user_id = NEW.user_id
-        AND is_active = true
         AND NEW.date >= start_date 
         AND NEW.date <= end_date;
     END IF;
@@ -106,15 +78,6 @@ BEGIN
       SET spent_amount = spent_amount - OLD.amount,
           updated_at = now()
       WHERE id = OLD.budget_id
-        AND OLD.date >= start_date 
-        AND OLD.date <= end_date;
-    ELSIF OLD.budget_id IS NULL AND OLD.category_id IS NOT NULL AND OLD.type = 'expense' THEN
-      UPDATE budgets 
-      SET spent_amount = spent_amount - OLD.amount,
-          updated_at = now()
-      WHERE category_id = OLD.category_id
-        AND user_id = OLD.user_id
-        AND is_active = true
         AND OLD.date >= start_date 
         AND OLD.date <= end_date;
     END IF;
