@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
 import { TransactionService } from '../services/transactionService';
 import { Transaction } from '../types/transaction';
@@ -24,26 +24,41 @@ export const useTransactionList = ({
   const [error, setError] = useState<Error | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
+  
+  // Use a ref to prevent concurrent loads which cause duplicates
+  const loadingRef = useRef(false);
 
   const loadTransactions = useCallback(
-    async (isRefreshing = false) => {
+    async (shouldRefresh = false) => {
+      if (loadingRef.current) return;
+      
       try {
-        if (isRefreshing) {
+        loadingRef.current = true;
+        if (shouldRefresh) {
           setIsRefreshing(true);
         } else {
           setIsLoading(true);
         }
 
+        const currentPage = shouldRefresh ? 0 : page;
         const { data, count } = await TransactionService.getInstance().getTransactions({
           accountId,
           categoryId,
           fromDate,
           toDate,
           limit,
-          offset: isRefreshing ? 0 : page * limit,
+          offset: currentPage * limit,
         });
 
-        setTransactions(prev => (isRefreshing ? data : [...prev, ...data]));
+        setTransactions(prev => {
+          if (shouldRefresh) return data;
+          
+          // De-duplicate items by ID to prevent repeats in the UI
+          const existingIds = new Set(prev.map(t => t.id));
+          const newItems = data.filter(t => !existingIds.has(t.id));
+          return [...prev, ...newItems];
+        });
+        
         setTotalCount(count);
         setError(null);
       } catch (err) {
@@ -52,18 +67,22 @@ export const useTransactionList = ({
       } finally {
         setIsLoading(false);
         setIsRefreshing(false);
+        loadingRef.current = false;
       }
     },
     [accountId, categoryId, fromDate, toDate, limit, page]
   );
 
   const handleRefresh = useCallback(() => {
+    // If already loading, ignore refresh
+    if (loadingRef.current) return;
+    
     setPage(0);
     loadTransactions(true);
   }, [loadTransactions]);
 
   const handleLoadMore = useCallback(() => {
-    if (!isLoading && !isRefreshing && transactions.length < totalCount) {
+    if (!isLoading && !isRefreshing && !loadingRef.current && transactions.length < totalCount) {
       setPage(prev => prev + 1);
     }
   }, [isLoading, isRefreshing, transactions.length, totalCount]);

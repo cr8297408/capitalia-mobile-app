@@ -10,7 +10,7 @@ interface PremiumState {
 }
 
 const DEFAULT_LIMITS: SubscriptionLimits = {
-  maxTransactions: 10000000,  // Reasonable limit for free tier
+  maxTransactions: 100,  // Realistic limit for free tier to match DB
   maxAccounts: 3,
   maxBudgets: 5,
   maxGoals: 3,

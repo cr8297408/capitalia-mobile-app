@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Switch, Platform, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Save, Calendar, Tag, DollarSign, Hash, FileText, Repeat, ArrowRight, ChevronDown } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -82,7 +82,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
     type,
     accountId,
     categoryId,
-    budgetId, // ✅ New budget field
+    budgetId,
     isRecurring,
     recurringFrequency,
     tags,
@@ -97,7 +97,7 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
     setType,
     setAccountId,
     setCategoryId,
-    setBudgetId, // ✅ New budget setter
+    setBudgetId,
     setIsRecurring,
     setRecurringFrequency,
     setTags,
@@ -114,11 +114,10 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
 
   const selectedAccount = accounts.find((a: Account) => a.id === accountId);
   const selectedCategory = categories.find(c => c.id === categoryId);
-  const selectedBudget = budgets.find(b => b.id === budgetId); // ✅ New budget selection
+  const selectedBudget = budgets.find(b => b.id === budgetId);
   const selectedTransferAccount = accounts.find((a: Account) => a.id === transferToAccountId);
   const selectedFrequency = FREQUENCIES.find(f => f.value === recurringFrequency);
 
-  // ✅ Auto-assign category when budget is selected
   useEffect(() => {
     if (associateToBudget && selectedBudget?.category_id && categoryId !== selectedBudget.category_id) {
       setCategoryId(selectedBudget.category_id);
@@ -185,7 +184,8 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                 style={[styles.input, styles.amountInput]}
                 value={formatCurrency(amount)}
                 onChangeText={(text) => {
-                  const parsedValue = parseCurrencyToNumber(text.replace(/[^0-9.,]/g, ''));
+                  const cleanedText = text.replace(/[^0-9.,]/g, '');
+                  const parsedValue = parseCurrencyToNumber(cleanedText);
                   setAmount(parsedValue);
                 }}
                 placeholder="0.00"
@@ -253,44 +253,10 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                 </Text>
               </View>
             )}
-            
-            {showAccountPicker && (
-              <View style={styles.pickerContainer}>
-                <ScrollView style={styles.pickerScrollView}>
-                  {accounts.map((account: Account) => (
-                    <TouchableOpacity
-                      key={account.id}
-                      style={styles.pickerItem}
-                      onPress={() => {
-                        setAccountId(account.id);
-                        setShowAccountPicker(false);
-                      }}
-                    >
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                        <Text style={styles.pickerItemText}>{account.name}</Text>
-                        <Text style={[styles.pickerItemText, { color: '#666' }]}>
-                          {new Intl.NumberFormat(undefined, {
-                            style: 'currency',
-                            currency: account.currency || 'USD',
-                          }).format(account.balance)}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-                <TouchableOpacity 
-                  style={styles.pickerCancelButton}
-                  onPress={() => setShowAccountPicker(false)}
-                >
-                  <Text style={styles.pickerCancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </View>
 
           {type !== 'transfer' && (
             <View style={styles.inputGroup}>
-              {/* Budget Association Toggle */}
               <View style={styles.checkboxContainer}>
                 <TouchableOpacity 
                   style={styles.checkboxButton}
@@ -299,11 +265,9 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                     setAssociateToBudget(newAssociateToBudget);
                     
                     if (newAssociateToBudget) {
-                      // When activating budget association, clear category
                       setCategoryId('');
                       setBudgetId('');
                     } else {
-                      // When deactivating budget association, clear budget but keep category
                       setBudgetId('');
                     }
                   }}
@@ -318,7 +282,6 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
               </View>
 
               {associateToBudget ? (
-                // Budget Selector
                 <>
                   <Text style={styles.label}>Budget</Text>
                   <TouchableOpacity 
@@ -330,49 +293,8 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                     </Text>
                     <ChevronDown size={20} color="#6B7280" />
                   </TouchableOpacity>
-                  
-                  {showBudgetPicker && (
-                    <View style={styles.pickerModal}>
-                      <Text style={styles.pickerTitle}>Select Budget</Text>
-                      {isLoadingBudgets ? (
-                        <Text style={styles.placeholderText}>Loading budgets...</Text>
-                      ) : (
-                        budgets.map(budget => (
-                          <TouchableOpacity
-                            key={budget.id}
-                            style={styles.pickerItem}
-                            onPress={() => {
-                              setBudgetId(budget.id);
-                              // Auto-set category from budget if available
-                              if (budget.category_id) {
-                                setCategoryId(budget.category_id);
-                              }
-                              setShowBudgetPicker(false);
-                            }}
-                          >
-                            <View>
-                              <Text style={styles.budgetName}>{budget.name}</Text>
-                              <Text style={styles.budgetSubtext}>
-                                {formatCurrencyDisplay(budget.spent_amount)} / {formatCurrencyDisplay(budget.amount)}
-                              </Text>
-                            </View>
-                            {budgetId === budget.id && (
-                              <View style={styles.checkmark} />
-                            )}
-                          </TouchableOpacity>
-                        ))
-                      )}
-                      <TouchableOpacity 
-                        style={styles.pickerCancelButton}
-                        onPress={() => setShowBudgetPicker(false)}
-                      >
-                        <Text style={styles.pickerCancelButtonText}>Cancel</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
                 </>
               ) : (
-                // Category Selector (original logic)
                 <>
                   <Text style={styles.label}>Category</Text>
                   <TouchableOpacity 
@@ -385,38 +307,6 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                     <ChevronDown size={20} color="#6B7280" />
                   </TouchableOpacity>
                 </>
-              )}
-              
-              
-              {showCategoryPicker && (
-                <View style={styles.pickerModal}>
-                  <Text style={styles.pickerTitle}>Select Category</Text>
-                  {isLoadingCategories ? (
-                    <Text style={styles.placeholderText}>Loading categories...</Text>
-                  ) : (
-                    categories.map(category => (
-                      <TouchableOpacity
-                        key={category.id}
-                        style={styles.pickerItem}
-                        onPress={() => {
-                          setCategoryId(category.id);
-                          setShowCategoryPicker(false);
-                        }}
-                      >
-                        <Text>{category.name}</Text>
-                        {categoryId === category.id && (
-                          <View style={styles.checkmark} />
-                        )}
-                      </TouchableOpacity>
-                    ))
-                  )}
-                  <TouchableOpacity 
-                    style={styles.pickerCancelButton}
-                    onPress={() => setShowCategoryPicker(false)}
-                  >
-                    <Text style={styles.pickerCancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
               )}
             </View>
           )}
@@ -433,77 +323,6 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                 </Text>
                 <ChevronDown size={20} color="#6B7280" />
               </TouchableOpacity>
-              
-              {showTransferAccountPicker && (
-                <View style={styles.pickerContainer}>
-                  <Text style={styles.pickerTitle}>Select Destination Account</Text>
-                  {selectedAccount && (
-                    <Text style={styles.pickerSubtitle}>
-                      From: {selectedAccount.name} ({selectedAccount.currency || 'USD'})
-                    </Text>
-                  )}
-                  <ScrollView style={styles.pickerScrollView}>
-                    {accounts.filter((acc: Account) => acc.id !== accountId).map((account: Account) => {
-                      const currencyMismatch = selectedAccount && 
-                        (selectedAccount.currency || 'USD') !== (account.currency || 'USD');
-                      
-                      return (
-                        <TouchableOpacity
-                          key={account.id}
-                          style={[
-                            styles.pickerItem,
-                            currencyMismatch && styles.pickerItemDisabled
-                          ]}
-                          onPress={() => {
-                            if (currencyMismatch) {
-                              Alert.alert(
-                                'Currency Mismatch',
-                                `Cannot transfer between accounts with different currencies.\n\nSource: ${selectedAccount?.currency || 'USD'}\nDestination: ${account.currency || 'USD'}`,
-                                [{ text: 'OK' }]
-                              );
-                              return;
-                            }
-                            setTransferToAccountId(account.id);
-                            setShowTransferAccountPicker(false);
-                          }}
-                        >
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                            <View style={{ flex: 1 }}>
-                              <Text style={[
-                                styles.pickerItemText,
-                                currencyMismatch && styles.pickerItemTextDisabled
-                              ]}>
-                                {account.name}
-                              </Text>
-                              {currencyMismatch && (
-                                <Text style={styles.currencyMismatchText}>
-                                  Currency mismatch ({account.currency || 'USD'})
-                                </Text>
-                              )}
-                            </View>
-                            <Text style={[
-                              styles.pickerItemText, 
-                              { color: '#666' },
-                              currencyMismatch && styles.pickerItemTextDisabled
-                            ]}>
-                              {new Intl.NumberFormat(undefined, {
-                                style: 'currency',
-                                currency: account.currency || 'USD',
-                              }).format(account.balance)}
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </ScrollView>
-                  <TouchableOpacity 
-                    style={styles.pickerCancelButton}
-                    onPress={() => setShowTransferAccountPicker(false)}
-                  >
-                    <Text style={styles.pickerCancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
             </View>
           )}
 
@@ -529,33 +348,6 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
                 </Text>
                 <ChevronDown size={20} color="#6B7280" />
               </TouchableOpacity>
-              
-              {showFrequencyPicker && (
-                <View style={styles.pickerModal}>
-                  <Text style={styles.pickerTitle}>Select Frequency</Text>
-                  {FREQUENCIES.map(frequency => (
-                    <TouchableOpacity
-                      key={frequency.value}
-                      style={styles.pickerItem}
-                      onPress={() => {
-                        setRecurringFrequency(frequency.value as any);
-                        setShowFrequencyPicker(false);
-                      }}
-                    >
-                      <Text>{frequency.label}</Text>
-                      {recurringFrequency === frequency.value && (
-                        <View style={styles.checkmark} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                  <TouchableOpacity 
-                    style={styles.pickerCancelButton}
-                    onPress={() => setShowFrequencyPicker(false)}
-                  >
-                    <Text style={styles.pickerCancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
             </View>
           )}
 
@@ -601,6 +393,222 @@ export const AddTransactionScreen: React.FC<AddTransactionScreenProps> = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* MODAL PICKERS - Moved to bottom of Root for correct overlay and scrolling */}
+      
+      {/* Account Picker */}
+      {showAccountPicker && (
+        <View style={styles.pickerModal}>
+          <Text style={styles.pickerTitle}>Select Account</Text>
+          <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+            {accounts.map((account: Account) => (
+              <TouchableOpacity
+                key={account.id}
+                style={styles.pickerItem}
+                onPress={() => {
+                  setAccountId(account.id);
+                  setShowAccountPicker(false);
+                }}
+              >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                  <Text style={styles.pickerItemText}>{account.name}</Text>
+                  <Text style={[styles.pickerItemText, { color: '#666' }]}>
+                    {new Intl.NumberFormat(undefined, {
+                      style: 'currency',
+                      currency: account.currency || 'USD',
+                    }).format(account.balance)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TouchableOpacity 
+            style={styles.pickerCancelButton}
+            onPress={() => setShowAccountPicker(false)}
+          >
+            <Text style={styles.pickerCancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Category Picker */}
+      {showCategoryPicker && (
+        <View style={styles.pickerModal}>
+          <Text style={styles.pickerTitle}>Select Category</Text>
+          <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+            {isLoadingCategories ? (
+              <Text style={styles.placeholderText}>Loading categories...</Text>
+            ) : (
+              categories.map(category => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={styles.pickerItem}
+                  onPress={() => {
+                    setCategoryId(category.id);
+                    setShowCategoryPicker(false);
+                  }}
+                >
+                  <Text style={styles.pickerItemText}>{category.name}</Text>
+                  {categoryId === category.id && (
+                    <View style={styles.pickerCheckmarkCircle} />
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+          <TouchableOpacity 
+            style={styles.pickerCancelButton}
+            onPress={() => setShowCategoryPicker(false)}
+          >
+            <Text style={styles.pickerCancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Budget Picker */}
+      {showBudgetPicker && (
+        <View style={styles.pickerModal}>
+          <Text style={styles.pickerTitle}>Select Budget</Text>
+          <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+            {isLoadingBudgets ? (
+              <Text style={styles.placeholderText}>Loading budgets...</Text>
+            ) : (
+              budgets.map(budget => (
+                <TouchableOpacity
+                  key={budget.id}
+                  style={styles.pickerItem}
+                  onPress={() => {
+                    setBudgetId(budget.id);
+                    if (budget.category_id) {
+                      setCategoryId(budget.category_id);
+                    }
+                    setShowBudgetPicker(false);
+                  }}
+                >
+                  <View>
+                    <Text style={styles.budgetName}>{budget.name}</Text>
+                    <Text style={styles.budgetSubtext}>
+                      {formatCurrencyDisplay(budget.spent_amount)} / {formatCurrencyDisplay(budget.amount)}
+                    </Text>
+                  </View>
+                  {budgetId === budget.id && (
+                    <View style={styles.pickerCheckmarkCircle} />
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+          <TouchableOpacity 
+            style={styles.pickerCancelButton}
+            onPress={() => setShowBudgetPicker(false)}
+          >
+            <Text style={styles.pickerCancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Transfer Destination Account Picker */}
+      {showTransferAccountPicker && (
+        <View style={styles.pickerModal}>
+          <Text style={styles.pickerTitle}>Select Destination Account</Text>
+          {selectedAccount && (
+            <Text style={styles.pickerSubtitle}>
+              From: {selectedAccount.name} ({selectedAccount.currency || 'USD'})
+            </Text>
+          )}
+          <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+            {accounts.filter((acc: Account) => acc.id !== accountId).map((account: Account) => {
+              const currencyMismatch = selectedAccount && 
+                (selectedAccount.currency || 'USD') !== (account.currency || 'USD');
+              
+              return (
+                <TouchableOpacity
+                  key={account.id}
+                  style={[
+                    styles.pickerItem,
+                    currencyMismatch && styles.pickerItemDisabled
+                  ]}
+                  onPress={() => {
+                    if (currencyMismatch) {
+                      Alert.alert(
+                        'Currency Mismatch',
+                        `Cannot transfer between accounts with different currencies.\n\nSource: ${selectedAccount?.currency || 'USD'}\nDestination: ${account.currency || 'USD'}`,
+                        [{ text: 'OK' }]
+                      );
+                      return;
+                    }
+                    setTransferToAccountId(account.id);
+                    setShowTransferAccountPicker(false);
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[
+                        styles.pickerItemText,
+                        currencyMismatch && styles.pickerItemTextDisabled
+                      ]}>
+                        {account.name}
+                      </Text>
+                      {currencyMismatch && (
+                        <Text style={styles.currencyMismatchText}>
+                          Currency mismatch ({account.currency || 'USD'})
+                        </Text>
+                      )}
+                    </View>
+                    <Text style={[
+                      styles.pickerItemText, 
+                      { color: '#666' },
+                      currencyMismatch && styles.pickerItemTextDisabled
+                    ]}>
+                      {new Intl.NumberFormat(undefined, {
+                        style: 'currency',
+                        currency: account.currency || 'USD',
+                      }).format(account.balance)}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+          <TouchableOpacity 
+            style={styles.pickerCancelButton}
+            onPress={() => setShowTransferAccountPicker(false)}
+          >
+            <Text style={styles.pickerCancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Frequency Picker */}
+      {showFrequencyPicker && (
+        <View style={styles.pickerModal}>
+          <Text style={styles.pickerTitle}>Select Frequency</Text>
+          <ScrollView style={styles.pickerScrollView} showsVerticalScrollIndicator={false}>
+            {FREQUENCIES.map(frequency => (
+              <TouchableOpacity
+                key={frequency.value}
+                style={styles.pickerItem}
+                onPress={() => {
+                  setRecurringFrequency(frequency.value as any);
+                  setShowFrequencyPicker(false);
+                }}
+              >
+                <Text style={styles.pickerItemText}>{frequency.label}</Text>
+                {recurringFrequency === frequency.value && (
+                  <View style={styles.pickerCheckmarkCircle} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TouchableOpacity 
+            style={styles.pickerCancelButton}
+            onPress={() => setShowFrequencyPicker(false)}
+          >
+            <Text style={styles.pickerCancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
     </SafeAreaView>
   );
 };

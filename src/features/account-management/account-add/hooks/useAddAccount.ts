@@ -69,10 +69,11 @@ export const useAddAccount = () => {
         // Create an initial transaction for the account balance
         if (balanceValue !== 0) {
           // Get the 'Other Income' category
-          const otherIncomeCategory = await categoryService.getCategoryByName('Other Income');
+          let categoryId = (await categoryService.getCategoryByName('Other Income'))?.id;
           
-          if (!otherIncomeCategory) {
-            console.warn("'Other Income' category not found, using default category");
+          if (!categoryId) {
+            console.warn("'Other Income' category not found, trying adjustment category");
+            categoryId = (await categoryService.getAdjustmentCategory()) || undefined;
           }
 
           await transactionService.createTransaction({
@@ -82,7 +83,7 @@ export const useAddAccount = () => {
             description: 'Initial balance',
             date: new Date().toISOString(),
             type: balanceValue >= 0 ? 'income' : 'expense',
-            category_id: otherIncomeCategory?.id || 'initial_balance',
+            category_id: categoryId as string,
             is_recurring: false,
           });
         }

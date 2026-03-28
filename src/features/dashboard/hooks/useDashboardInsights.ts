@@ -38,31 +38,6 @@ interface GoalProgress {
 
 export type PeriodType = 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'this_year';
 
-// Mock AI insights (as requested to keep only AI insights as mock)
-const MOCK_AI_INSIGHTS: AIInsight[] = [
-  {
-    id: '1',
-    type: 'savings',
-    title: 'Oportunidad de ahorro',
-    message: 'Podrías ahorrar hasta 150€ reduciendo gastos en comida este mes',
-    actionText: 'Ver sugerencias',
-  },
-  {
-    id: '2',
-    type: 'goal',
-    title: 'Meta de Vacaciones casi alcanzada',
-    message: 'Vas 75% hacia tu objetivo de 5.000€. ¡Solo 1.250€ más!',
-    actionText: 'Ver meta',
-  },
-  {
-    id: '3',
-    type: 'spending',
-    title: 'Alto gasto en Comida',
-    message: 'Los gastos en comida han aumentado 15% este mes comparado con el anterior',
-    actionText: 'Ver detalles',
-  },
-];
-
 export function useDashboardInsights() {
   const { user } = useAuth();
   const [categoryExpenses, setCategoryExpenses] = useState<CategoryExpense[]>([]);
@@ -71,6 +46,37 @@ export function useDashboardInsights() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('this_month');
+
+  // Load AI Insights from Supabase
+  const loadAIInsights = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('ai_insights')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) {
+        console.warn('Error fetching AI insights:', error.message);
+        return;
+      }
+
+      const formattedInsights: AIInsight[] = data?.map((insight: any) => ({
+        id: insight.id,
+        type: insight.type as AIInsight['type'],
+        title: insight.title,
+        message: insight.message,
+        actionText: insight.action_text,
+      })) || [];
+
+      setAIInsights(formattedInsights);
+    } catch (err) {
+      console.error('Error loading AI insights:', err);
+    }
+  }, [user?.id]);
 
   // Get date range based on selected period
   const getDateRange = useCallback((period: PeriodType) => {
@@ -262,10 +268,6 @@ export function useDashboardInsights() {
     }
   }, []);
 
-  const generateAIInsights = useCallback((categories: CategoryExpense[], goals: GoalProgress[]) => {
-    // Use mock AI insights for now (as requested)
-    setAIInsights(MOCK_AI_INSIGHTS);
-  }, []);
 
   const loadData = useCallback(async (period?: PeriodType) => {
     const currentPeriod = period || selectedPeriod;
@@ -282,6 +284,7 @@ export function useDashboardInsights() {
       await Promise.all([
         loadCategoryExpenses(currentPeriod),
         loadGoalProgress(),
+        loadAIInsights(),
       ]);
 
     } catch (err) {
@@ -291,12 +294,8 @@ export function useDashboardInsights() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, selectedPeriod, loadCategoryExpenses, loadGoalProgress]);
+  }, [user?.id, selectedPeriod, loadCategoryExpenses, loadGoalProgress, loadAIInsights]);
 
-  // Generate insights when data changes
-  useEffect(() => {
-    generateAIInsights(categoryExpenses, goalProgress);
-  }, [categoryExpenses, goalProgress, generateAIInsights]);
 
   // Load data on mount and when user changes
   useEffect(() => {
