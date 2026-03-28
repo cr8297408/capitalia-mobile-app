@@ -17,7 +17,7 @@ Esta guía detalla los pasos para generar el archivo de aplicación (`.aab`) y s
 ## 2. Configuración del Proyecto
 
 Verifica que en tu archivo `app.json` los siguientes campos sean correctos:
-*   `android.package`: `com.cr8297408.capitaliaapp`
+*   `android.package`: `com.cr8297408.capitalia`
 *   `version`: La versión visible para el usuario (ej. `2.1.0`).
 *   `android.versionCode`: (EAS lo incrementará automáticamente gracias a `autoIncrement: true` en `eas.json`).
 
