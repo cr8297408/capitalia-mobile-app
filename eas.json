@@ -22,10 +22,9 @@
       "env": {
         "EXPO_PUBLIC_APP_NAME": "Capitalia Preview",
         "EXPO_PUBLIC_ENVIRONMENT": "preview",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://cscjvphmummrxebyjxzp.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzY2p2cGhtdW1tcnhlYnlqeHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MzY3MzgsImV4cCI6MjA3MzMxMjczOH0.JXf3e8Ft71ClRalPOhxblQqD3Zm_EYM3h6V0qExgt0I",
-        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51S4a1RQojnZODoVYzMGOBJNps3wkQwkwTtgNurhgKgVeRfF1LLb40dSFbV1GCyfwX7aDxRzfeR7sFi94hf1bZBtK00zRL1C7CC",
-        "EXPO_PUBLIC_APP_VERSION": "2.0.0"
+        "EXPO_PUBLIC_SUPABASE_URL": "EXPO_PUBLIC_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "EXPO_PUBLIC_SUPABASE_ANON_KEY",
+        "EXPO_PUBLIC_APP_VERSION": "EXPO_PUBLIC_APP_VERSION"
       },
       "channel": "preview"
     },
@@ -37,10 +36,9 @@
       "env": {
         "EXPO_PUBLIC_APP_NAME": "Capitalia",
         "EXPO_PUBLIC_ENVIRONMENT": "production",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://cscjvphmummrxebyjxzp.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzY2p2cGhtdW1tcnhlYnlqeHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MzY3MzgsImV4cCI6MjA3MzMxMjczOH0.JXf3e8Ft71ClRalPOhxblQqD3Zm_EYM3h6V0qExgt0I",
-        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51S4a1RQojnZODoVYzMGOBJNps3wkQwkwTtgNurhgKgVeRfF1LLb40dSFbV1GCyfwX7aDxRzfeR7sFi94hf1bZBtK00zRL1C7CC",
-        "EXPO_PUBLIC_APP_VERSION": "2.0.0"
+        "EXPO_PUBLIC_SUPABASE_URL": "EXPO_PUBLIC_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "EXPO_PUBLIC_SUPABASE_ANON_KEY",
+        "EXPO_PUBLIC_APP_VERSION": "EXPO_PUBLIC_APP_VERSION"
       },
       "channel": "production"
     }
