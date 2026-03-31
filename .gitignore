@@ -47,4 +47,7 @@ pepk.jar
 
 encrypted-private-key.zip
 
+# EAS
+eas.json
+
 credentials.json

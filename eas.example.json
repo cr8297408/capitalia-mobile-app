@@ -1,0 +1,55 @@
+{
+  "cli": {
+    "version": ">= 16.19.3",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "autoIncrement": true,
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_NAME": "Capitalia Dev",
+        "EXPO_PUBLIC_ENVIRONMENT": "development",
+        "EXPO_PUBLIC_SUPABASE_URL": "YOUR_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "YOUR_STRIPE_PUBLISHABLE_KEY",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      }
+    },
+    "preview": {
+      "autoIncrement": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_NAME": "Capitalia Preview",
+        "EXPO_PUBLIC_ENVIRONMENT": "preview",
+        "EXPO_PUBLIC_SUPABASE_URL": "YOUR_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "YOUR_STRIPE_PUBLISHABLE_KEY",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      },
+      "channel": "preview"
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_NAME": "Capitalia",
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_SUPABASE_URL": "YOUR_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "YOUR_STRIPE_PUBLISHABLE_KEY",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0"
+      },
+      "channel": "production"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
